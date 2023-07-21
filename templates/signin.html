@@ -1,0 +1,16 @@
+<html>
+    <form method="post">
+        <label for="fullname">First and Last Name :</label>
+        <input autocomplete="off" type="text" id="fullname" name="fullname" >
+
+        <label for="id"> id number : </label>
+        <input autocomplete="off" type="number" id="id" name="id"  >
+
+        <button name="submit" value="signin" >Sign In</button>
+    </form>
+    {%if msg%}
+    <p>Non-existent</p>
+    {%else%}
+    <p></p>
+    {%endif%}
+</html>

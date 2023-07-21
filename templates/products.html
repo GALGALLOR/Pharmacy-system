@@ -1,0 +1,82 @@
+<html>
+    <div class="navbar">
+        <ul>
+            <li>Galgallo Roba</li>
+            <li> <a href="/sign_in">Log Out</a> </li>
+            
+        </ul>
+    </div>
+    <h1>Re-stock :</h1>
+
+<form action="#" method="post" > 
+    <table>
+        <tr>
+            <td> <label for="ID">ID</label> </td>
+            <td> <input type="number" name="ID" id="ID"> </td>
+        </tr>
+        <tr>
+            <td> <label for="Quantity">Quantity</label> </td>
+            <td> <input type="number" name="Quantity" id="quantity"> </td>
+        </tr>
+        <tr>
+            <td> <label for="Bp">buying price</label> </td>
+            <td> <input type="number" name="Bp" id="Bp"> </td>
+        </tr>
+        <tr>
+            <td> <label for="sp">Selling price</label> </td>
+            <td> <input type="number" name="sp" id="sp"> </td>
+        </tr>
+        <tr>
+            <td> <label for="expiry_date">Expiry date</label> </td>
+            <td> <input type="date" name="expiry_date" id="expiry_date"> </td>
+        </tr>
+    </table>
+    <button value="restock" name="submit" >RESTOCK</button>
+</form>
+
+
+<h1>Add new Product</h1>
+<form action="" method="post">
+    <table>
+    <tr><td><label for="drugname">drug Name :</label></td><td><input id="drugname" type="text" name="drugname"></td> </tr>
+
+    <tr><td><label for="Quantity">Quantity :</label></td><td><input id="Quantity" type="number" name="Quantity"></td> </tr>
+
+    <tr><td><label for="ID">ID :</label></td><td><input id="ID" type="text" name="ID"></td> </tr>
+
+    <tr><td><label for="brand">brand :</label></td><td><input id="brand" type="text" name="brand"></td> </tr>
+
+    <tr><td><label for="category">category :</label></td><td><input id="category" type="text" name="category"></td> </tr>
+
+
+    </table>
+    <button name="submit" value="add_product" >ADD PRODUCT</button>
+</form>
+
+<div class="delete-product">
+    <h1>delete product</h1>
+    <form action="#" method="post" >
+        <input type="text" placeholder="search ID" >
+        <ul>
+            <li><label for="med1">med1</label>
+                <input type="checkbox" name="drugs" id="med1">
+
+            </li>
+            <li><label for="med2">med2</label>
+                <input type="checkbox" name="drugs" id="med2">
+
+            </li>
+            <li><label for="med3">med3</label>
+                <input type="checkbox" name="drugs" id="med3">
+
+            </li>
+        </ul>
+        <p>Items to be Deleted are:</p>
+        <ul>
+            <li style='color:red;' ><label for="med1" >paracetamol</label></li>
+            <li style='color:red;' ><label for="med2" >panadol</label></li>
+        </ul>
+        <button name="submit" value="delete" >DELETE</button>
+    </form>
+</div>
+</html>

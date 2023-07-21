@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pharmaceutical Website</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+
+        .casual {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        #orderlist {
+            margin-top: 20px;
+            background: #ffffff;
+            border: 1px solid #ccc;
+            padding: 20px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        #searchBar {
+            padding: 5px;
+            width: 100%;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+        }
+
+        #itemTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        #itemTable th,
+        #itemTable td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ccc;
+        }
+
+        #itemTable th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        #itemTable tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .minus,
+        .plus {
+            cursor: pointer;
+        }
+
+        .receipt {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .receipt input[type="number"] {
+            padding: 5px;
+            width: 100px;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .receipt button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .receipt button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Button styles */
+        label[for="startOrder"],
+        label[for="cancelOrder"],
+        #OrderButton {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        label[for="startOrder"]:hover,
+        label[for="cancelOrder"]:hover,
+        #OrderButton:hover {
+            background-color: #0056b3;
+        }
+
+        label[for="startOrder"],
+        #OrderButton {
+            margin: 5px;
+        }
+        .pastTransactions {
+            display: block;
+            margin: 50vh auto;
+            max-width: 600px;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            padding: 20px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .pastTransactions h2 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+
+        .pastTransactions table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .pastTransactions th,
+        .pastTransactions td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .pastTransactions th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .pastTransactions tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .pastTransactions li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Welcome Galgallo Roba</h1>
+    <div class="casual">
+        <input onclick="funcOrder()" style="display:none;" type="checkbox" name="startOrder" id="startOrder">
+        <label for="startOrder" id="OrderButton">Start Order</label>
+    </div>
+    <form action=""></form>
+    <div style="display:none;" id="orderlist">
+        <input autocomplete="off" type="text" placeholder="Search for drug" name="searchBar" id="searchBar">
+        <table id="itemTable">
+            <tr>
+                <th>No.</th>
+                <th>DrugID</th>
+                <th>Drug Name</th>
+                <th>Brand</th>
+                <th>Category</th>
+                <th>Expiry Date</th>
+                <th>Quantity</th>
+                <th>Dosage</th>
+                <th>Strength</th>
+                <th>Unit Price</th>
+                <th>Order:</th>
+            </tr>
+            <tr>
+                <td>1.</td>
+                <td>412</td>
+                <td>Paracetamol</td>
+                <td>Paracetamol</td>
+                <td>Analgesics</td>
+                <td>14/02/2025</td>
+                <td>100</td>
+                <td>1x3</td>
+                <td>Medium</td>
+                <td>Ksh <span id="UP1" >30</span></td>
+                <td><span onclick="minus_cart('DrugID1','UP1')" class="minus" style="font-size: 50px;color:red;" >- </span>
+                
+                <input name="DrugID1" type="number" id="DrugID1" style="font-size:40px;border:none;border-bottom:1px solid black;width:2cm;" value="00" >
+                
+                     
+                     <span onclick="add_cart('DrugID1','UP1')" class="plus" style="font-size: 50px;color:rgb(0, 255, 0);" > +</span></td>
+            </tr>
+            <tr>
+                <td>2.</td>
+                <td>312</td>
+                <td>Flugone</td>
+                <td>Flugone</td>
+                <td>Antibiotic</td>
+                <td>14/02/2025</td>
+                <td>100</td>
+                <td>1x3</td>
+                <td>Medium</td>
+                <td>Ksh <span id="UP2" >30</span></td>
+                <td><span onclick="minus_cart('DrugID2','UP2')" class="minus" style="font-size: 50px;color:red;" >- </span>
+                
+                <input name="DrugID2" type="number" id="DrugID2" style="font-size:40px;border:none;border-bottom:1px solid black;width:2cm;" value="00" >
+                
+                     
+                     <span onclick="add_cart('DrugID2','UP2')" class="plus" style="font-size: 50px;color:rgb(0, 255, 0);" > +</span></td>
+            </tr>
+        </table>
+        <div class="receipt">
+            Total Amount: <input type="number" style="font-size:50px;width:5cm;" name="TotalCost" id="TotalCost" value="00.00">
+            <br>
+            <label for="startOrder" id="cancelOrder">Cancel Button</label>
+            <button name="submit" value="buyNow">BUY NOW</button>
+        </div>
+    </div>
+
+    <!-- Past transactions table -->
+    <div class="pastTransactions" style="display: block; margin-top: 10vh;">
+        <h2>Past Transactions</h2>
+        <table>
+            <tr>
+                <th>No.</th>
+                <th>Transaction ID</th>
+                <th>Transaction Date</th>
+                <th>Total Cost</th>
+                <th>Items Bought:</th>
+            </tr>
+            <tr>
+                <td>1.</td>
+                <td>4215</td>
+                <td>25/7/2023</td>
+                <td>Ksh 1440</td>
+                <td>
+                    <ul>
+                        <li>Panadol : Ksh 20x3=60</li>
+                        <li>Flugone Ksh 30x5=150</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td>1.</td>
+                <td>4215</td>
+                <td>25/7/2023</td>
+                <td>Ksh 1440</td>
+                <td>
+                    <ul>
+                        <li>Panadol : Ksh 20x3=60</li>
+                        <li>Flugone Ksh 30x5=150</li>
+                    </ul>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        // JavaScript code for handling the display of past transactions table
+        const pastTransactionsDiv = document.querySelector('.pastTransactions');
+        const startOrderCheckbox = document.getElementById('startOrder');
+
+        startOrderCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                pastTransactionsDiv.style.display = 'none';
+            } else {
+                pastTransactionsDiv.style.display = 'block';
+            }
+        });
+
+         // Start Order
+         var orderButton=document.getElementById("OrderButton");
+        var startOrder=document.getElementById("startOrder");
+        function funcOrder(){
+            if(startOrder.checked==true){
+                orderlist.style.display='block';
+            }
+            else{
+                orderlist.style.display='none';
+            };
+        };
+        //Increase/decrease the Order numbers
+        
+        function minus_cart(itemQ,itemP){
+           
+            var itemQ1=document.getElementById(itemQ);
+            var itemP1=document.getElementById(itemP);
+            if (Number(itemQ1.value)<=0){
+                alert('Cannot subtract from 0');
+            }
+            else{
+            itemQ1.value=Number(itemQ1.value)-1;
+            //Subtract Subtotal(Unit Price & Quantity) from TotalCost
+            var TotalCost=document.getElementById('TotalCost');
+            TotalCost.value=Number(TotalCost.value)-Number(itemP1.innerHTML);
+            };
+        };
+        function add_cart(itemQ,itemP){
+           
+           var itemQ1=document.getElementById(itemQ);
+           var itemP1=document.getElementById(itemP);
+           
+           itemQ1.value=Number(itemQ1.value)+1;
+           //Add Subtotal(Unit Price & Quantity) to TotalCost
+           var TotalCost=document.getElementById('TotalCost');
+           TotalCost.value=Number(TotalCost.value)+Number(itemP1.innerHTML);
+           
+       };
+       //Search Engine Code
+const searchInput = document.getElementById('searchBar');
+const itemTable = document.getElementById('itemTable');
+const rows = itemTable.getElementsByTagName('tr');
+
+searchInput.addEventListener('input', filterItems);
+
+function filterItems() {
+  const searchTerm = searchInput.value.toLowerCase();
+  for (let i = 1; i < rows.length; i++) { // Start the loop from index 1 to skip the header row
+    const row = rows[i];
+    const cells = row.getElementsByTagName('td');
+    let matchFound = false;
+
+    for (const cell of cells) {
+      const cellValue = cell.textContent.toLowerCase();
+      if (cellValue.includes(searchTerm)) {
+        matchFound = true;
+        break;
+      }
+    }
+
+    if (matchFound) {
+      row.style.display = 'table-row';
+    } else {
+      row.style.display = 'none';
+    }
+  }
+};
+//cancel Order
+document.getElementById("cancelOrder").addEventListener("click", function() {
+            document.getElementById("TotalCost").value = "00.00";
+            const quantityInputs = document.querySelectorAll('input[type="number"]');
+            quantityInputs.forEach(input => input.value = "0");
+        });
+
+
+    </script>
+</body>
+</html>
