@@ -1,0 +1,4 @@
+<!-- stock0=stockID,
+                UP= {%for drug in drug_details%}{%if drug[0]==stock[1]%}{{drug[7]}}{%endif%}{%endfor%},
+
+                     -->

@@ -110,7 +110,7 @@
         .pastTransactions {
             display: block;
             margin: 50vh auto;
-            max-width: 600px;
+            max-width: 800px;
             background-color: #ffffff;
             border: 1px solid #ccc;
             padding: 20px;
@@ -147,6 +147,9 @@
         .pastTransactions li {
             margin-bottom: 5px;
         }
+        ul li{
+            list-style-type: none;
+        }
     </style>
 </head>
 
@@ -161,7 +164,6 @@
         <input autocomplete="off" type="text" placeholder="Search for drug" name="searchBar" id="searchBar">
         <table id="itemTable">
             <tr>
-                <th>No.</th>
                 <th>DrugID</th>
                 <th>Drug Name</th>
                 <th>Brand</th>
@@ -173,42 +175,30 @@
                 <th>Unit Price</th>
                 <th>Order:</th>
             </tr>
+            
+            {%for stock in stocks%}
+            {%for drug in drug_details%}
+            {%if drug[0]==stock[1]%}
             <tr>
-                <td>1.</td>
-                <td>412</td>
-                <td>Paracetamol</td>
-                <td>Paracetamol</td>
-                <td>Analgesics</td>
-                <td>14/02/2025</td>
-                <td>100</td>
-                <td>1x3</td>
-                <td>Medium</td>
-                <td>Ksh <span id="UP1" >30</span></td>
-                <td><span onclick="minus_cart('DrugID1','UP1')" class="minus" style="font-size: 50px;color:red;" >- </span>
+                <td>{{stock[1]}}</td>
+                <td>{{drug[1]}}</td>
+                <td>{{drug[3]}}</td>
+                <td>{{drug[2]}}</td>
+                <td>{{stock[4]}}</td>
+                <td>{{stock[8]}}</td>
+                <td>{{drug[4]}}</td>
+                <td>{{drug[5]}}</td>
+                <td>Ksh <span id="{{drug[7]}}" >
+                    {{drug[7]}}
+                    </span></td>
+                <td><span onclick="minus_cart('{{stock[0]}}','{{drug[7]}}')" class="minus" style="font-size: 50px;color:red;" >- </span>
                 
-                <input name="DrugID1" type="number" id="DrugID1" style="font-size:40px;border:none;border-bottom:1px solid black;width:2cm;" value="00" >
+                <input name="{{stock[0]}}" type="number" id="{{stock[0]}}" style="font-size:40px;border:none;border-bottom:1px solid black;width:2cm;" value="00" >
                 
                      
-                     <span onclick="add_cart('DrugID1','UP1')" class="plus" style="font-size: 50px;color:rgb(0, 255, 0);" > +</span></td>
-            </tr>
-            <tr>
-                <td>2.</td>
-                <td>312</td>
-                <td>Flugone</td>
-                <td>Flugone</td>
-                <td>Antibiotic</td>
-                <td>14/02/2025</td>
-                <td>100</td>
-                <td>1x3</td>
-                <td>Medium</td>
-                <td>Ksh <span id="UP2" >30</span></td>
-                <td><span onclick="minus_cart('DrugID2','UP2')" class="minus" style="font-size: 50px;color:red;" >- </span>
-                
-                <input name="DrugID2" type="number" id="DrugID2" style="font-size:40px;border:none;border-bottom:1px solid black;width:2cm;" value="00" >
-                
-                     
-                     <span onclick="add_cart('DrugID2','UP2')" class="plus" style="font-size: 50px;color:rgb(0, 255, 0);" > +</span></td>
-            </tr>
+                     <span onclick="add_cart('{{stock[0]}}','{{drug[7]}}')" class="plus" style="font-size: 50px;color:rgb(0, 255, 0);" > +</span></td>
+            </tr>{%endif%}{%endfor%}{%endfor%}
+            
         </table>
         <div class="receipt">
             Total Amount: <input type="number" style="font-size:50px;width:5cm;" name="TotalCost" id="TotalCost" value="00.00">
@@ -224,36 +214,26 @@
         <h2>Past Transactions</h2>
         <table>
             <tr>
-                <th>No.</th>
                 <th>Transaction ID</th>
                 <th>Transaction Date</th>
                 <th>Total Cost</th>
                 <th>Items Bought:</th>
             </tr>
+            {%for transaction in past_transactions%}
             <tr>
-                <td>1.</td>
-                <td>4215</td>
-                <td>25/7/2023</td>
-                <td>Ksh 1440</td>
-                <td>
-                    <ul>
-                        <li>Panadol : Ksh 20x3=60</li>
-                        <li>Flugone Ksh 30x5=150</li>
-                    </ul>
+                <td>{{transaction[0]}}</td>
+                <td>{{transaction[2]}}</td>
+                <td>{{transaction[3]}}</td>
+                <td><ul>{%for past_transaction_item in past_transaction_items%}
+                    {%if past_transaction_item[1] == transaction[0]%}
+                    <li>{{past_transaction_item[4]}} : Ksh {{past_transaction_item[3]}}x{{past_transaction_item[2]}}={{past_transaction_item[5]}}</li>
+                    {%endif%}
+                    {%endfor%}</ul>
                 </td>
             </tr>
-            <tr>
-                <td>1.</td>
-                <td>4215</td>
-                <td>25/7/2023</td>
-                <td>Ksh 1440</td>
-                <td>
-                    <ul>
-                        <li>Panadol : Ksh 20x3=60</li>
-                        <li>Flugone Ksh 30x5=150</li>
-                    </ul>
-                </td>
-            </tr>
+            {%endfor%}
+            
+            
         </table>
     </div>
 
