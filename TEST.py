@@ -134,7 +134,9 @@ def order():
             id_number=str(session['id'])
             cursor.execute('INSERT INTO TRANSACTION(TRANSACTION_ID,CASHIER_ID,SALE_DATE,TOTAL_SALES)VALUES(%s,%s,%s,%s)',(last_transaction_id,id_number,sale_date,total_cost))
             mydb.connection.commit()
-            #insert sales
+            #Deduct from the inventory
+            #deduct from stocks_table[rem_stock]
+            
             
 
         else:
