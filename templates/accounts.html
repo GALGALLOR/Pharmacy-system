@@ -37,6 +37,7 @@
         #container {
             display: flex;
             align-items: center;
+            justify-content: space-between;
             padding: 20px;
             background-color: #f1f1f1;
         }
@@ -60,9 +61,39 @@
         #user-details ul {
             list-style: none;
             padding: 0;
+            margin: 0;
         }
         #user-details li {
             margin-bottom: 10px;
+        }
+        .user-details-right {
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+        }
+        .user-details-right li {
+            color: #777;
+        }
+        .user-details-right .label {
+            font-weight: bold;
+        }
+        .center {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #56c483;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        .cta-button:hover {
+            background-color: #44aadd;
         }
     </style>
 </head>
@@ -78,16 +109,30 @@
     </div>
     <div id="container">
         <img id="profile-image" src="https://via.placeholder.com/200" alt="Profile Image">
+        
         <div id="user-details">
-            <h2>Full Name : GALGALLO ROBA</h2>
+            <h2>Full Name: {{user[1]}}</h2>
+            <h2>Title: {{user[2]}}</h2>
             <ul>
-                <li>ID Number: 123456789</li>
-                <li>Employment Date: July 15, 2022</li>
-                <li>Total Goods Sold: 250</li>
-                <li>STATUS: ON</li>
-                <!-- Add more details here if needed -->
+                <li>ID Number: {{user[0]}}</li>
+                <li>Contact: {{user[3]}}</li>
+                <li>Employment Date: {{user[4]}}</li>
+                <div class="user-details-right">
+                    <li class="label">Status: {{user[5]}}</li>
+                    <li><a class="cta-button" href="/products">View Store</a></li>
+                    <li>Total Drugs Sold: {{Drugs_Sold}}</li>
+                    <li>Total Drugs Re-stocked: {{RestocksMade}}</li>
+                    <li>Total Drugs Deleted: {{Drugs_deleted}}</li>
+                    <li>Total Drugs Added: {{Drugs_added}}</li>
+                    <li>Total Stocks Deleted: {{stocks_Deleted}}</li>
+                    <li>Total Suppliers Added: {{Suppliers_added}}</li>
+                    <li>Total Suppliers Deleted: {{Suppliers_deleted}}</li>
+                    <li>Total Members Added: {{members_added}}</li>
+                    <li>Total Members Deleted: {{members_deleted}}</li>
+                </div>
             </ul>
         </div>
     </div>
+    
 </body>
 </html>

@@ -15,16 +15,7 @@
         h1 {
             color: #0066cc;
             text-align: center;
-            transition: .5s;
-            border-radius: 1cm;
         }
-        h1:hover{
-            background:#5658c4;
-            
-            color:white;
-            padding:0.5cm;
-        }
-
 
         /* Navbar styles */
         .navbar {
@@ -101,7 +92,6 @@
         }
         label:hover{
             cursor: pointer;
-            background:#56c483;
         }
         /* Navbar styles */
         .navbar {
@@ -220,22 +210,6 @@
         </form>
         
     </div>
-     <!-- Cont 5-->
-     <div class="container">
-        <label for="newSupplier"><h1>ADD NEW SUPPLIER</h1></label>
-        <form id="cont5" style="display:none;" method="post">
-                <table>
-                    <tr><td><label for="">SUPPLIER NAME:</label>     </td><td style="width:100%;" ><input required  type="text" name="SupplierName" ><br></td></tr>
-                    <tr><td><label for="">CONTACT: </label></td><td style="width:100%;" ><input required  name="contact" type="text"><br></td></tr>
-                    <tr><td><label for="">LOCATION:</label></td><td style="width:100%;" ><input required  name="location" type="text"><br></td></tr>
-
-                </table>
-    
-                <button name="submit" value="AddNewSupplier" >NEW SUPPLIER</button>
-        
-        </form>
-    </div>
-    {%if managerCheck=='Yes'%}
     <!-- Cont 3-->
     <div class="container">
         <label for="DELETE_DRUG"><h1>DELETE DRUG</h1></label>
@@ -310,7 +284,21 @@
             <button name="submit" value="delete_stock" >DELETE STOCK</button>
         </form>
     </div>
-   
+    <!-- Cont 5-->
+    <div class="container">
+        <label for="newSupplier"><h1>ADD NEW SUPPLIER</h1></label>
+        <form id="cont5" style="display:none;" method="post">
+                <table>
+                    <tr><td><label for="">SUPPLIER NAME:</label>     </td><td style="width:100%;" ><input required  type="text" name="SupplierName" ><br></td></tr>
+                    <tr><td><label for="">CONTACT: </label></td><td style="width:100%;" ><input required  name="contact" type="text"><br></td></tr>
+                    <tr><td><label for="">LOCATION:</label></td><td style="width:100%;" ><input required  name="location" type="text"><br></td></tr>
+
+                </table>
+    
+                <button name="submit" value="AddNewSupplier" >NEW SUPPLIER</button>
+        
+        </form>
+    </div>
     <!-- cont6 DELETE SUPPLIER -->
     <div class="container">
         <label for="delete_supplier"><h1>DELETE SUPPLIER</h1></label>
@@ -386,7 +374,6 @@
             <button name="submit" value="ACTIVATE" >ACTIVATE</button>
         </form>
     </div>
-    {%endif%}
     <script>
         //Selling Price autoUpdate
         function sp_autoupdate(drugid,drugcost){
