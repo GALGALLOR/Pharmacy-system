@@ -150,10 +150,50 @@
         ul li{
             list-style-type: none;
         }
+        /* Navbar styles */
+        .navbar {
+            background-color: #44aadd;
+            color: white;
+            padding:25px 20px;
+        }
+
+        .navbar ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .navbar li {
+            margin: 0 15px;
+        }
+
+        .navbar li a {
+            text-decoration: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .navbar li a:hover {
+            background-color: #56c483;
+        }
     </style>
 </head>
 
 <body>
+    <div class="navbar">
+        <ul>
+            <li><a href="/order">ORDER</a></li>
+            <li><a href="/products">DRUGS</a></li>
+            <li><a href="/products">SUPPLIERS</a></li>
+            <li><a href="/accounts">ACCOUNT</a></li>
+            <li><a href="/sign_in">LOGOUT</a></li>
+        </ul>
+    </div>
     <h1>Welcome Galgallo Roba</h1>
     <div class="casual">
         <input onclick="funcOrder()" style="display:none;" type="checkbox" name="startOrder" id="startOrder">
@@ -179,7 +219,12 @@
             {%for stock in stocks%}
             {%for drug in drug_details%}
             {%if drug[0]==stock[1]%}
+            <!-- Make Red if expired -->
+            {%if stock[4] <= expiry_range %}
+            <tr style='color:red'>
+            {%else%}
             <tr>
+            {%endif%}
                 <td>{{stock[1]}}</td>
                 <td>{{drug[1]}}</td>
                 <td>{{drug[3]}}</td>

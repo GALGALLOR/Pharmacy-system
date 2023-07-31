@@ -38,7 +38,7 @@ def signin():
         try:
             
             cursor=mydb.connection.cursor()
-            cursor.execute(f'SELECT TWO_NAMES FROM USERS WHERE USER_ID="{id_number}"')
+            cursor.execute(f'SELECT TWO_NAMES FROM USERS WHERE USER_ID="{id_number}" AND TWO_NAMES="{fullname}" AND ACTIVE="ON"')
             identity=cursor.fetchall()[0][0]
             print(identity)
 
@@ -74,7 +74,7 @@ def order():
         fullname=session['fullname']
         if request.method=='POST':
             submit=str(request.form['submit'])
-
+            #get each itemID and its Quantity bought
             cursor=mydb.connection.cursor()
             cursor.execute('SELECT * from STOCK_TABLE')
             counter=cursor.fetchall()
@@ -95,10 +95,14 @@ def order():
             #Get last Sales_ID
             cursor=mydb.connection.cursor()
             cursor.execute('SELECT SALES_ID FROM SALES')
-            last_sales_id=cursor.fetchall()[-1][0]
-            last_sales_id=int(last_sales_id)+1
+            last_sales_id=int(cursor.fetchall()[-1][0])
+            
             sale_date=str(datetime.date.today())
             total_cost=0
+            #Get stocks_data
+            cursor=mydb.connection.cursor()
+            cursor.execute('SELECT * FROM STOCK_TABLE')
+            last_stocks_data=cursor.fetchall()
             #Get Product cost for each ID
             for stockID in Sold_items:
                 if int(stockID[1])==0:
@@ -126,19 +130,20 @@ def order():
                     cursor.execute('INSERT INTO TRANSACTION_ITEMS(TRANSACTION_ITEM_ID,TRANSACTION_ID,QUANTITY,UNIT_PRICE,PRODUCT_NAME,SUBTOTAL)VALUES(%s,%s,%s,%s,%s,%s)',(last_Titem_id,last_transaction_id,stockID[1],cost,drug_name,subtotal))
                     mydb.connection.commit()
                     #insert into SALES
-                    cursor.execute('INSERT INTO SALES(SALES_ID,PRODUCT_ID,SALES)')
+                    last_sales_id=int(last_sales_id)+1
+                    cursor.execute('INSERT INTO SALES(SALES_ID,STOCK_ID,SALES_DATE,QUANTITY,UNIT_PRICE,TOTAL_AMOUNT)VALUES(%s,%s,%s,%s,%s,%s)',(last_sales_id,stockID[0],sale_date,stockID[1],cost,subtotal))
+                    mydb.connection.commit()
+                    #deduct from stocks_table[rem_stock]
+                    cursor.execute('SELECT REM_STOCK FROM STOCK_TABLE WHERE STOCK_ID='+str(stockID[0]))
+                    rem_stock=int(cursor.fetchall()[0][0])
+                    rem_stock=rem_stock-int(stockID[1])
+                    cursor.execute(f'UPDATE STOCK_TABLE SET REM_STOCK={rem_stock} WHERE STOCK_ID={stockID[0]}')
                     mydb.connection.commit()
 
             #insert transaction
-            
             id_number=str(session['id'])
             cursor.execute('INSERT INTO TRANSACTION(TRANSACTION_ID,CASHIER_ID,SALE_DATE,TOTAL_SALES)VALUES(%s,%s,%s,%s)',(last_transaction_id,id_number,sale_date,total_cost))
             mydb.connection.commit()
-            #Deduct from the inventory
-            #deduct from stocks_table[rem_stock]
-            
-            
-
         else:
             pass            
                         
@@ -148,7 +153,7 @@ def order():
     
     #list down past transactions
     cursor=mydb.connection.cursor()
-    cursor.execute('SELECT * FROM TRANSACTION')
+    cursor.execute('SELECT * FROM TRANSACTION ORDER BY TRANSACTION_ID DESC')
     past_transactions=cursor.fetchall()
     cursor.execute('SELECT * FROM TRANSACTION_ITEMS')
     past_transaction_items=cursor.fetchall()
@@ -159,7 +164,144 @@ def order():
     inventory=cursor.fetchall()
     cursor.execute('SELECT * FROM STOCK_TABLE')
     stocks=cursor.fetchall()
-    return render_template('order2.html',stocks=stocks,drug_details=drug_details, past_transaction_items=past_transaction_items,past_transactions=past_transactions)
+    #set expiry dates
+    year=datetime.date.today().year
+    month=datetime.date.today().month+4
+    date=datetime.date.today().day
+    if month>12:
+        year=year+1
+        month=month-12
+    try:
+        expiry_range=datetime.date(year,month,date)
+    except:
+        expiry_range=datetime.date(year,month,25)
+
+    return render_template('order2.html',stocks=stocks,drug_details=drug_details, past_transaction_items=past_transaction_items,past_transactions=past_transactions,expiry_range=expiry_range)
+
+@app.route('/products' ,methods=['POST','GET'] )
+def products():
+    if 'fullname' in session:
+        #drug details
+        cursor=mydb.connection.cursor()
+        cursor.execute('SELECT * FROM DRUG_DETAILS')
+        drug_details=cursor.fetchall()
+        #stock data for last stock information
+        cursor.execute('SELECT * FROM STOCK_TABLE')
+        stockdata=cursor.fetchall()
+        cursor.execute('SELECT * FROM STOCK_TABLE ORDER BY STOCK_ID DESC')
+        stockdataDesc=cursor.fetchall()
+        #suppliers
+        cursor.execute('SELECT * FROM SUPPLIERS ORDER BY SUPPLIER_ID DESC')
+        suppliers=cursor.fetchall()
+        cursor.execute('SELECT * FROM SUPPLIERS')
+        suppliersNew=cursor.fetchall()
+        #get staff data
+        cursor.execute('SELECT * FROM USERS')
+        users=cursor.fetchall()
+
+        if request.method=='POST':
+            submit=request.form['submit']
+            if submit=='restock':
+                staffId=session['id']
+                drugId=request.form['drugId']
+                drugQuantity=request.form['Quantity']
+                drugBP=request.form['drugBP']
+                drugSP=request.form['drugSP']
+                drug_ExpiryDate=request.form['drug_ExpiryDate']
+                stock_id=int(stockdata[-1][0])+1
+                drug_supplier=request.form['supplier']
+                today=datetime.date.today()
+                xxx=drug_ExpiryDate.split('-')
+                x=datetime.date(int(xxx[0]),int(xxx[1]),int(xxx[2]))
+                print(x)
+                if today>x:
+                    msg='The drug is already expired'
+                    print(msg)
+                else:
+                    cursor.execute('INSERT INTO STOCK_TABLE(STOCK_ID,PRODUCT_ID,SUPPLIER_ID,STOCK_DATE,EXPIRY_DATE,QUANTITY,STAFF_ID,BP,REM_STOCK)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)',(stock_id,drugId,drug_supplier,today,drug_ExpiryDate,drugQuantity,staffId,drugBP,drugBP))
+                    mydb.connection.commit()
+                    #update SellingPrice
+                    cursor.execute(f'UPDATE DRUG_DETAILS SET COST={drugSP} WHERE DRUG_ID={drugId}')
+                    mydb.connection.commit()
+            elif submit=='addNewDrug':
+                DrugId=int(drug_details[-1][0])+1
+                DrugName=request.form['drugName']
+                DrugCategory=request.form['drugCategory']
+                DrugBrand=request.form['drugBrand']
+                DrugDosage=request.form['dosage']
+                DrugStrength=request.form['drugStrength']
+                DrugCost=request.form['drugCost']
+                presence='no'
+                for drugs in drug_details:
+                    if DrugName==drugs[1]:
+                        if DrugCategory==drugs[2]:
+                            if DrugBrand==drugs[3]:
+                                presence='yes'
+                if presence=='no':
+                    cursor.execute('INSERT INTO DRUG_DETAILS(DRUG_ID,DRUG_NAME,CATEGORY,BRAND,DOSAGE,STRENGTH,STATUS,COST)VALUES(%s,%s,%s,%s,%s,%s,%s,%s)',(DrugId,DrugName,DrugCategory,DrugBrand,DrugDosage,DrugStrength,'yes',DrugCost))
+                    mydb.connection.commit()
+                else:
+                    print('The drug already exists')
+            elif submit=='delete_drug':
+                DrugId=request.form['drugId']
+                cursor.execute('DELETE FROM DRUG_DETAILS WHERE DRUG_ID="'+DrugId+'"')
+                mydb.connection.commit()
+                cursor.execute('DELETE FROM STOCK_TABLE WHERE PRODUCT_ID="'+DrugId+'"')
+                mydb.connection.commit()
+            elif submit=='delete_stock':
+                print('delete stock')
+                StockId=request.form['StockId']
+                print(StockId)
+                cursor.execute('DELETE FROM STOCK_TABLE WHERE STOCK_ID="'+StockId+'"')
+                mydb.connection.commit()
+            elif submit=='AddNewSupplier':
+                cursor.execute('SELECT * FROM SUPPLIERS')
+                suppliersNew=cursor.fetchall()
+                SupplierId = int(suppliersNew[-1][0]) + 1
+                print(SupplierId)
+                supplierName = request.form["SupplierName"]
+                contactNumber = request.form['contact']
+                location=request.form['location']
+                
+                cursor.execute('INSERT INTO SUPPLIERS(SUPPLIER_ID,SUPPLIER_NAME,CONTACT,LOCATION)VALUES(%s,%s,%s,%s)',(SupplierId,supplierName,contactNumber,location))
+                mydb.connection.commit()
+            elif submit=='delete_supplier':
+                supplierId=request.form['supplierId']
+                cursor.execute('DELETE FROM SUPPLIERS WHERE SUPPLIER_ID="'+supplierId+'"')
+                mydb.connection.commit()
+            elif submit=='NewMember':
+                fullname=request.form['FullName']
+                IdNumber=request.form['IdNumber']
+                contact=request.form['contact']
+                title=request.form['title']
+                today=datetime.date.today()
+                
+                cursor.execute('INSERT INTO USERS(USER_ID,TWO_NAMES,TITLE,PHONE_NUMBER,EMPLOYMENT_DATE,ACTIVE)VALUES(%s,%s,%s,%s,%s,%s)',(IdNumber,fullname,title,contact,today,'ON'))
+                mydb.connection.commit()
+                        
+            elif submit=='delete_Member':
+                memberId=request.form['memberID']
+                cursor.execute('UPDATE USERS SET ACTIVE="OFF" WHERE USER_ID="'+memberId+'"')
+                mydb.connection.commit()
+            elif submit=='ACTIVATE':
+                memberId=request.form['memberID']
+                cursor.execute('UPDATE USERS SET ACTIVE="ON" WHERE USER_ID="'+memberId+'"')
+                mydb.connection.commit()
+                
+
+
+            return redirect(url_for('products'))
+
+                
+                            
+                
+
+        else:
+            pass
+    else:
+        return redirect(url_for('signin'))
+    
+    return render_template('products.html',drug_details=drug_details,suppliers=suppliers,users=users,stockdata=stockdata,stockdataDesc=stockdataDesc)
 
 if __name__ == '__main__':
     app.run(debug=True)
