@@ -38,7 +38,7 @@ def signin():
         try:
             
             cursor=mydb.connection.cursor()
-            cursor.execute(f'SELECT TWO_NAMES FROM USERS WHERE USER_ID="{id_number}" AND TWO_NAMES="{fullname}"')
+            cursor.execute(f'SELECT TWO_NAMES FROM USERS WHERE USER_ID="{id_number}" AND TWO_NAMES="{fullname}" AND ACTIVE="ON"')
             identity=cursor.fetchall()[0][0]
             print(identity)
 
@@ -265,6 +265,30 @@ def products():
                 
                 cursor.execute('INSERT INTO SUPPLIERS(SUPPLIER_ID,SUPPLIER_NAME,CONTACT,LOCATION)VALUES(%s,%s,%s,%s)',(SupplierId,supplierName,contactNumber,location))
                 mydb.connection.commit()
+            elif submit=='delete_supplier':
+                supplierId=request.form['supplierId']
+                cursor.execute('DELETE FROM SUPPLIERS WHERE SUPPLIER_ID="'+supplierId+'"')
+                mydb.connection.commit()
+            elif submit=='NewMember':
+                fullname=request.form['FullName']
+                IdNumber=request.form['IdNumber']
+                contact=request.form['contact']
+                title=request.form['title']
+                today=datetime.date.today()
+                
+                cursor.execute('INSERT INTO USERS(USER_ID,TWO_NAMES,TITLE,PHONE_NUMBER,EMPLOYMENT_DATE,ACTIVE)VALUES(%s,%s,%s,%s,%s,%s)',(IdNumber,fullname,title,contact,today,'ON'))
+                mydb.connection.commit()
+                        
+            elif submit=='delete_Member':
+                memberId=request.form['memberID']
+                cursor.execute('UPDATE USERS SET ACTIVE="OFF" WHERE USER_ID="'+memberId+'"')
+                mydb.connection.commit()
+            elif submit=='ACTIVATE':
+                memberId=request.form['memberID']
+                cursor.execute('UPDATE USERS SET ACTIVE="ON" WHERE USER_ID="'+memberId+'"')
+                mydb.connection.commit()
+                
+
 
             return redirect(url_for('products'))
 

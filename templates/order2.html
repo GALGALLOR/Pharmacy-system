@@ -230,7 +230,7 @@
                 <td>{{drug[3]}}</td>
                 <td>{{drug[2]}}</td>
                 <td>{{stock[4]}}</td>
-                <td>{{stock[8]}}</td>
+                <td id="F{{stock[0]}}" >{{stock[8]}}</td>
                 <td>{{drug[4]}}</td>
                 <td>{{drug[5]}}</td>
                 <td>Ksh <span id="{{drug[7]}}" >
@@ -241,7 +241,7 @@
                 <input name="{{stock[0]}}" type="number" id="{{stock[0]}}" style="font-size:40px;border:none;border-bottom:1px solid black;width:2cm;" value="00" >
                 
                      
-                     <span onclick="add_cart('{{stock[0]}}','{{drug[7]}}')" class="plus" style="font-size: 50px;color:rgb(0, 255, 0);" > +</span></td>
+                     <span onclick="add_cart('{{stock[0]}}','{{drug[7]}}','F{{stock[0]}}')" class="plus" style="font-size: 50px;color:rgb(0, 255, 0);" > +</span></td>
             </tr>{%endif%}{%endfor%}{%endfor%}
             
         </table>
@@ -322,16 +322,21 @@
             TotalCost.value=Number(TotalCost.value)-Number(itemP1.innerHTML);
             };
         };
-        function add_cart(itemQ,itemP){
+        function add_cart(itemQ,itemP,f){
            
            var itemQ1=document.getElementById(itemQ);
            var itemP1=document.getElementById(itemP);
+           var f1=document.getElementById(f);
+           if (Number(itemQ1.value) >= Number(f1.innerHTML)){
+            alert('Maximum quantity achieved');
+           }
+           else{
            
            itemQ1.value=Number(itemQ1.value)+1;
            //Add Subtotal(Unit Price & Quantity) to TotalCost
            var TotalCost=document.getElementById('TotalCost');
            TotalCost.value=Number(TotalCost.value)+Number(itemP1.innerHTML);
-           
+           }
        };
        //Search Engine Code
 const searchInput = document.getElementById('searchBar');
