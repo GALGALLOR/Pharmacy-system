@@ -160,8 +160,7 @@ def order():
     #list Down DrugDetails,inventory & stock
     cursor.execute('SELECT * FROM DRUG_DETAILS')
     drug_details=cursor.fetchall()
-    cursor.execute('SELECT QUANTITY FROM INVENTORY')
-    inventory=cursor.fetchall()
+    
     cursor.execute('SELECT * FROM STOCK_TABLE')
     stocks=cursor.fetchall()
     #set expiry dates
@@ -181,6 +180,8 @@ def order():
 @app.route('/products' ,methods=['POST','GET'] )
 def products():
     if 'fullname' in session:
+        #date
+        today=datetime.date.today()
         #drug details
         cursor=mydb.connection.cursor()
         cursor.execute('SELECT * FROM DRUG_DETAILS')
@@ -198,6 +199,20 @@ def products():
         #get staff data
         cursor.execute('SELECT * FROM USERS')
         users=cursor.fetchall()
+        #SEE IF MANAGER
+        managerCheck="No"
+        staffId=session['id']
+        cursor.execute(f'SELECT * FROM USERS WHERE USER_ID={staffId}')
+        user_details=cursor.fetchall()[0]
+        print(user_details)
+        if 'anager' in user_details[2]:
+            print('MANAGER ALERT')
+            managerCheck="Yes"
+        elif 'ANAGER' in user_details[2]:
+            print('MANAGER ALERT')
+            managerCheck="Yes"
+        else:
+            pass
 
         if request.method=='POST':
             submit=request.form['submit']
@@ -223,6 +238,8 @@ def products():
                     #update SellingPrice
                     cursor.execute(f'UPDATE DRUG_DETAILS SET COST={drugSP} WHERE DRUG_ID={drugId}')
                     mydb.connection.commit()
+                    
+
             elif submit=='addNewDrug':
                 DrugId=int(drug_details[-1][0])+1
                 DrugName=request.form['drugName']
@@ -240,6 +257,13 @@ def products():
                 if presence=='no':
                     cursor.execute('INSERT INTO DRUG_DETAILS(DRUG_ID,DRUG_NAME,CATEGORY,BRAND,DOSAGE,STRENGTH,STATUS,COST)VALUES(%s,%s,%s,%s,%s,%s,%s,%s)',(DrugId,DrugName,DrugCategory,DrugBrand,DrugDosage,DrugStrength,'yes',DrugCost))
                     mydb.connection.commit()
+                    #Update UserLog
+                    cursor.execute('SELECT * FROM USER_LOG ORDER BY LOG_ID DESC')
+                    last_log_id=int(cursor.fetchall()[-1][0])+1
+                    
+                    cursor.execute('INSERT INTO USER_LOG(LOG_ID,DRUG_ID,USER_ID,DATE,ACTIVITY)VALUES(%s,%s,%s,%s,%s)',(last_log_id,DrugId,staffId,today,'ADD'))
+                    mydb.connection.commit()
+
                 else:
                     print('The drug already exists')
             elif submit=='delete_drug':
@@ -248,12 +272,24 @@ def products():
                 mydb.connection.commit()
                 cursor.execute('DELETE FROM STOCK_TABLE WHERE PRODUCT_ID="'+DrugId+'"')
                 mydb.connection.commit()
+                #Update UserLog
+                cursor.execute('SELECT * FROM USER_LOG ORDER BY LOG_ID DESC')
+                last_log_id=int(cursor.fetchall()[-1][0])+1
+                cursor.execute('INSERT INTO USER_LOG(LOG_ID,DRUG_ID,USER_ID,DATE,ACTIVITY)VALUES(%s,%s,%s,%s,%s)',(last_log_id,DrugId,staffId,today,'DELETE'))
+                mydb.connection.commit()
+                
             elif submit=='delete_stock':
                 print('delete stock')
                 StockId=request.form['StockId']
                 print(StockId)
                 cursor.execute('DELETE FROM STOCK_TABLE WHERE STOCK_ID="'+StockId+'"')
                 mydb.connection.commit()
+                #Update UserLog
+                cursor.execute('SELECT * FROM USER_LOG ORDER BY LOG_ID DESC')
+                last_log_id=int(cursor.fetchall()[-1][0])+1
+                cursor.execute('INSERT INTO USER_LOG(LOG_ID,STOCK_ID,USER_ID,DATE,ACTIVITY)VALUES(%s,%s,%s,%s,%s)',(last_log_id,StockId,staffId,today,'DELETE'))
+                mydb.connection.commit()
+
             elif submit=='AddNewSupplier':
                 cursor.execute('SELECT * FROM SUPPLIERS')
                 suppliersNew=cursor.fetchall()
@@ -265,10 +301,23 @@ def products():
                 
                 cursor.execute('INSERT INTO SUPPLIERS(SUPPLIER_ID,SUPPLIER_NAME,CONTACT,LOCATION)VALUES(%s,%s,%s,%s)',(SupplierId,supplierName,contactNumber,location))
                 mydb.connection.commit()
+                #Update UserLog
+                cursor.execute('SELECT * FROM USER_LOG ORDER BY LOG_ID DESC')
+                last_log_id=int(cursor.fetchall()[-1][0])+1
+                cursor.execute('INSERT INTO USER_LOG(LOG_ID,SUPPLIER_ID,USER_ID,DATE,ACTIVITY)VALUES(%s,%s,%s,%s,%s)',(last_log_id,SupplierId,staffId,today,'ADD'))
+                mydb.connection.commit()
+
+
             elif submit=='delete_supplier':
-                supplierId=request.form['supplierId']
+                supplierId=request.form['SupplierId']
                 cursor.execute('DELETE FROM SUPPLIERS WHERE SUPPLIER_ID="'+supplierId+'"')
                 mydb.connection.commit()
+                #Update UserLog
+                cursor.execute('SELECT * FROM USER_LOG ORDER BY LOG_ID DESC')
+                last_log_id=int(cursor.fetchall()[-1][0])+1
+                cursor.execute('INSERT INTO USER_LOG(LOG_ID,SUPPLIER_ID,USER_ID,DATE,ACTIVITY)VALUES(%s,%s,%s,%s,%s)',(last_log_id,supplierId,staffId,today,'DELETE'))
+                mydb.connection.commit()
+
             elif submit=='NewMember':
                 fullname=request.form['FullName']
                 IdNumber=request.form['IdNumber']
@@ -278,14 +327,30 @@ def products():
                 
                 cursor.execute('INSERT INTO USERS(USER_ID,TWO_NAMES,TITLE,PHONE_NUMBER,EMPLOYMENT_DATE,ACTIVE)VALUES(%s,%s,%s,%s,%s,%s)',(IdNumber,fullname,title,contact,today,'ON'))
                 mydb.connection.commit()
+                #Update UserLog
+                cursor.execute('SELECT * FROM USER_LOG ORDER BY LOG_ID DESC')
+                last_log_id=int(cursor.fetchall()[-1][0])+1
+                cursor.execute('INSERT INTO USER_LOG(LOG_ID,MEMBER_ID,USER_ID,DATE,ACTIVITY)VALUES(%s,%s,%s,%s,%s)',(last_log_id,IdNumber,staffId,today,'ADD'))
+                mydb.connection.commit()
                         
             elif submit=='delete_Member':
                 memberId=request.form['memberID']
                 cursor.execute('UPDATE USERS SET ACTIVE="OFF" WHERE USER_ID="'+memberId+'"')
                 mydb.connection.commit()
+                #Update UserLog
+                cursor.execute('SELECT * FROM USER_LOG ORDER BY LOG_ID DESC')
+                last_log_id=int(cursor.fetchall()[-1][0])+1
+                cursor.execute('INSERT INTO USER_LOG(LOG_ID,MEMBER_ID,USER_ID,DATE,ACTIVITY)VALUES(%s,%s,%s,%s,%s)',(last_log_id,memberId,staffId,today,'DELETE'))
+                mydb.connection.commit()
+
             elif submit=='ACTIVATE':
                 memberId=request.form['memberID']
                 cursor.execute('UPDATE USERS SET ACTIVE="ON" WHERE USER_ID="'+memberId+'"')
+                mydb.connection.commit()
+                #Update UserLog
+                cursor.execute('SELECT * FROM USER_LOG ORDER BY LOG_ID DESC')
+                last_log_id=int(cursor.fetchall()[-1][0])+1
+                cursor.execute('INSERT INTO USER_LOG(LOG_ID,MEMBER_ID,USER_ID,DATE,ACTIVITY)VALUES(%s,%s,%s,%s,%s)',(last_log_id,memberId,staffId,today,'ADD'))
                 mydb.connection.commit()
                 
 
@@ -301,7 +366,54 @@ def products():
     else:
         return redirect(url_for('signin'))
     
-    return render_template('products.html',drug_details=drug_details,suppliers=suppliers,users=users,stockdata=stockdata,stockdataDesc=stockdataDesc)
+    return render_template('products.html',managerCheck=managerCheck,drug_details=drug_details,suppliers=suppliers,users=users,stockdata=stockdata,stockdataDesc=stockdataDesc)
+
+
+@app.route('/accounts' ,methods=['POST','GET'] )
+def accounts():
+    if 'fullname' in session:
+        #user info
+        user_id=session['id']
+        cursor=mydb.connection.cursor()
+        cursor.execute(f'SELECT * FROM USERS WHERE USER_ID={user_id}')
+        user=cursor.fetchall()[0]
+
+
+        cursor.execute(f'SELECT COUNT(*) FROM TRANSACTION WHERE CASHIER_ID={user_id}')
+        Drugs_Sold=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT COUNT(*) FROM STOCK_TABLE WHERE STAFF_ID={user_id}')
+        RestocksMade=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT COUNT(*) FROM TRANSACTION WHERE CASHIER_ID={user_id}')
+        Drugs_Sold=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT COUNT(DRUG_ID) FROM USER_LOG WHERE USER_ID={user_id} AND ACTIVITY="DELETE" ')
+        Drugs_deleted=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT COUNT(DRUG_ID) FROM USER_LOG WHERE USER_ID={user_id} AND ACTIVITY="ADD" ')
+        Drugs_added=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT COUNT(STOCK_ID) FROM USER_LOG WHERE USER_ID={user_id} AND ACTIVITY="DELETE" ')
+        stocks_Deleted=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT COUNT(SUPPLIER_ID) FROM USER_LOG WHERE USER_ID={user_id} AND ACTIVITY="ADD" ')
+        Suppliers_added=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT COUNT(SUPPLIER_ID) FROM USER_LOG WHERE USER_ID={user_id} AND ACTIVITY="DELETE" ')
+        Suppliers_deleted=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT COUNT(MEMBER_ID) FROM USER_LOG WHERE USER_ID={user_id} AND ACTIVITY="ADD" ')
+        members_added=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT COUNT(MEMBER_ID) FROM USER_LOG WHERE USER_ID={user_id} AND ACTIVITY="DELETE" ')
+        members_deleted=cursor.fetchall()[0][0]
+
+        
+
+
+
+    return render_template('accounts.html',user=user,members_deleted=members_deleted,members_added=members_added,Suppliers_deleted=Suppliers_deleted,Suppliers_added=Suppliers_added,stocks_Deleted=stocks_Deleted,Drugs_added=Drugs_added,Drugs_deleted=Drugs_deleted,Drugs_Sold=Drugs_Sold,RestocksMade=RestocksMade)
 
 if __name__ == '__main__':
     app.run(debug=True)

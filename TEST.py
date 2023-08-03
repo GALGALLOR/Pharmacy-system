@@ -410,6 +410,8 @@ def accounts():
         cursor.execute(f'SELECT COUNT(MEMBER_ID) FROM USER_LOG WHERE USER_ID={user_id} AND ACTIVITY="DELETE" ')
         members_deleted=cursor.fetchall()[0][0]
 
+    else:
+        return redirect(url_for('signin'))
         
 
 
