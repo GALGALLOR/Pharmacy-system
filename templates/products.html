@@ -141,7 +141,7 @@
         <ul>
             <li><a href="/order">ORDER</a></li>
             <li><a href="/products">DRUGS</a></li>
-            <li><a href="/products">SUPPLIERS</a></li>
+            <li><a href="/store">STORE</a></li>
             <li><a href="/accounts">ACCOUNT</a></li>
             <li><a href="/sign_in">LOGOUT</a></li>
         </ul>
@@ -261,11 +261,11 @@
                     <td> <label for="delete{{drug[0]}}"> {{drug[2]}}</label></td>
                     <td> <label for="delete{{drug[0]}}"> {{drug[4]}}</label></td>
                     <td> <label for="delete{{drug[0]}}"> {{drug[5]}}</label></td>
-                    <td> <label for="delete{{drug[0]}}"> {{drug[7]}}</label></td>
+                    <td> <label for="delete{{drug[0]}}"> Ksh {{drug[7]}}</label></td>
                 </tr>
                 {%endfor%}
             </table>
-            <button name="submit" value="delete_drug" >DELETE DRUG</button>
+            <button name="submit" style="background:rgb(150, 46, 46);" value="delete_drug" >DELETE DRUG</button>
         </form>
     </div>
 
@@ -289,7 +289,18 @@
                     <th>Buying Price</th>
                 </tr>
                 {%for stock in stockdataDesc %}
-                <tr>
+                <!-- Make Red if expired -->
+        {%if stock[4] <= expiry_range %}
+        {%if stock[4] > today %}
+            <tr style='color:orange'>
+        {%else%}
+        <tr style='color:red'>        
+        {%endif%}
+    {%elif stock[8] < 1 %}
+    <tr style="color:rgb(255, 0, 166)" >
+    {%else%}
+    <tr>
+    {%endif%}
                     <td><input required type="radio" name="StockId" value="{{stock[0]}}" id="DelStock{{stock[0]}}"></td>
                     <td> <label for="DelStock{{stock[0]}}">{{stock[0]}} </label></td>
                     {%for drug in drug_details%}
@@ -303,11 +314,11 @@
                     <td> <label for="DelStock{{stock[0]}}"> {{stock[4]}}</label></td>
                     <td> <label for="DelStock{{stock[0]}}">{{stock[5]}} </label></td>
                     <td> <label for="DelStock{{stock[0]}}"> {{stock[6]}} </label></td>
-                    <td> <label for="DelStock{{stock[0]}}"> {{stock[7]}}</label></td>
+                    <td> <label for="DelStock{{stock[0]}}"> Ksh {{stock[7]}}</label></td>
                 </tr>
                 {%endfor%}
             </table>
-            <button name="submit" value="delete_stock" >DELETE STOCK</button>
+            <button name="submit" style="background:rgb(150, 46, 46);"  value="delete_stock" >DELETE STOCK</button>
         </form>
     </div>
    
@@ -334,7 +345,7 @@
                 </tr>
                 {%endfor%}
             </table>
-            <button name="submit" value="delete_supplier" >DELETE STOCK</button>
+            <button name="submit" style="background:rgb(150, 46, 46);"  value="delete_supplier" >DELETE STOCK</button>
         </form>
     </div>
     <!-- cont7 ADD STAFF MEMBER -->
@@ -382,8 +393,8 @@
                     </tr>
                 {%endfor%}
             </table>
-            <button name="submit" value="delete_Member" >DELETE MEMBER</button>
-            <button name="submit" value="ACTIVATE" >ACTIVATE</button>
+            <button name="submit" style="background:rgb(150, 46, 46);"  value="delete_Member" >DELETE MEMBER</button>
+            <button name="submit" style="background:rgb(36, 142, 60);"  value="ACTIVATE" >ACTIVATE</button>
         </form>
     </div>
     {%endif%}
@@ -582,6 +593,7 @@
                 cont8.style.display='none';
             }
         };
+        
     </script>
 </body>
 </html>

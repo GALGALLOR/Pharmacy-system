@@ -134,15 +134,7 @@
         </div>
         
     </div>
-    {%if user[2] == "MANAGER" %}
-    <div class="cashiers">
-        <ul>
-            {%for cashier in cashiers%}
-            <li><a href="/{{cashier[0]}}">{{cashier[1]}}</a></li>
-            {%endfor%}
-        </ul>
-    </div>
-    {%endif%}
+    
     
 </body>
 </html>

@@ -189,7 +189,7 @@
         <ul>
             <li><a href="/order">ORDER</a></li>
             <li><a href="/products">DRUGS</a></li>
-            <li><a href="/products">SUPPLIERS</a></li>
+            <li><a href="/store">STORE</a></li>
             <li><a href="/accounts">ACCOUNT</a></li>
             <li><a href="/sign_in">LOGOUT</a></li>
         </ul>
@@ -220,11 +220,17 @@
             {%for drug in drug_details%}
             {%if drug[0]==stock[1]%}
             <!-- Make Red if expired -->
-            {%if stock[4] <= expiry_range %}
-            <tr style='color:red'>
-            {%else%}
-            <tr>
-            {%endif%}
+        {%if stock[4] <= expiry_range %}
+        {%if stock[4] > today %}
+            <tr style='color:orange'>
+        {%else%}
+        <tr style='color:red'>        
+        {%endif%}
+    {%elif stock[8] < 1 %}
+    <tr style="color:rgb(255, 0, 166)" >
+    {%else%}
+    <tr>
+    {%endif%}
                 <td>{{stock[1]}}</td>
                 <td>{{drug[1]}}</td>
                 <td>{{drug[3]}}</td>

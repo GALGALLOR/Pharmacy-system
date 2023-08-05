@@ -160,10 +160,12 @@ def order():
     #list Down DrugDetails,inventory & stock
     cursor.execute('SELECT * FROM DRUG_DETAILS')
     drug_details=cursor.fetchall()
-    
+    cursor.execute('SELECT QUANTITY FROM INVENTORY')
+    inventory=cursor.fetchall()
     cursor.execute('SELECT * FROM STOCK_TABLE')
     stocks=cursor.fetchall()
     #set expiry dates
+    today=datetime.date.today()
     year=datetime.date.today().year
     month=datetime.date.today().month+4
     date=datetime.date.today().day
@@ -175,7 +177,7 @@ def order():
     except:
         expiry_range=datetime.date(year,month,25)
 
-    return render_template('order2.html',stocks=stocks,drug_details=drug_details, past_transaction_items=past_transaction_items,past_transactions=past_transactions,expiry_range=expiry_range)
+    return render_template('order2.html',stocks=stocks,drug_details=drug_details, past_transaction_items=past_transaction_items,past_transactions=past_transactions,today=today,expiry_range=expiry_range)
 
 @app.route('/products' ,methods=['POST','GET'] )
 def products():
@@ -213,6 +215,17 @@ def products():
             managerCheck="Yes"
         else:
             pass
+        #set expiry dates
+        year=datetime.date.today().year
+        month=datetime.date.today().month+4
+        date=datetime.date.today().day
+        if month>12:
+            year=year+1
+            month=month-12
+        try:
+            expiry_range=datetime.date(year,month,date)
+        except:
+            expiry_range=datetime.date(year,month,25)
 
         if request.method=='POST':
             submit=request.form['submit']
@@ -232,8 +245,15 @@ def products():
                 if today>x:
                     msg='The drug is already expired'
                     print(msg)
+                    #correction 4/8/2023
+                    cursor.execute('INSERT INTO STOCK_TABLE(STOCK_ID,PRODUCT_ID,SUPPLIER_ID,STOCK_DATE,EXPIRY_DATE,QUANTITY,STAFF_ID,BP,REM_STOCK)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)',(stock_id,drugId,drug_supplier,today,drug_ExpiryDate,drugQuantity,staffId,drugBP,drugQuantity))
+                    mydb.connection.commit()
+                    #update SellingPrice
+                    cursor.execute(f'UPDATE DRUG_DETAILS SET COST={drugSP} WHERE DRUG_ID={drugId}')
+                    mydb.connection.commit()
                 else:
-                    cursor.execute('INSERT INTO STOCK_TABLE(STOCK_ID,PRODUCT_ID,SUPPLIER_ID,STOCK_DATE,EXPIRY_DATE,QUANTITY,STAFF_ID,BP,REM_STOCK)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)',(stock_id,drugId,drug_supplier,today,drug_ExpiryDate,drugQuantity,staffId,drugBP,drugBP))
+                    #correction 4/8/2023
+                    cursor.execute('INSERT INTO STOCK_TABLE(STOCK_ID,PRODUCT_ID,SUPPLIER_ID,STOCK_DATE,EXPIRY_DATE,QUANTITY,STAFF_ID,BP,REM_STOCK)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)',(stock_id,drugId,drug_supplier,today,drug_ExpiryDate,drugQuantity,staffId,drugBP,drugQuantity))
                     mydb.connection.commit()
                     #update SellingPrice
                     cursor.execute(f'UPDATE DRUG_DETAILS SET COST={drugSP} WHERE DRUG_ID={drugId}')
@@ -357,16 +377,12 @@ def products():
 
             return redirect(url_for('products'))
 
-                
-                            
-                
-
         else:
             pass
     else:
         return redirect(url_for('signin'))
     
-    return render_template('products.html',managerCheck=managerCheck,drug_details=drug_details,suppliers=suppliers,users=users,stockdata=stockdata,stockdataDesc=stockdataDesc)
+    return render_template('products.html',today=today,expiry_range=expiry_range,managerCheck=managerCheck,drug_details=drug_details,suppliers=suppliers,users=users,stockdata=stockdata,stockdataDesc=stockdataDesc)
 
 
 @app.route('/accounts' ,methods=['POST','GET'] )
@@ -409,11 +425,84 @@ def accounts():
         cursor.execute(f'SELECT COUNT(MEMBER_ID) FROM USER_LOG WHERE USER_ID={user_id} AND ACTIVITY="DELETE" ')
         members_deleted=cursor.fetchall()[0][0]
 
+        cursor.execute(f'SELECT * FROM USERS WHERE TITLE="CASHIER" ')
+        cashiers=cursor.fetchall()
+
+    else:
+        return redirect(url_for('signin'))
+    return render_template('accounts.html',cashiers=cashiers,user=user,members_deleted=members_deleted,members_added=members_added,Suppliers_deleted=Suppliers_deleted,Suppliers_added=Suppliers_added,stocks_Deleted=stocks_Deleted,Drugs_added=Drugs_added,Drugs_deleted=Drugs_deleted,Drugs_Sold=Drugs_Sold,RestocksMade=RestocksMade)
+
+@app.route('/<cashier_id>' ,methods=['POST','GET'] )
+def accounts_cashier(cashier_id):
+    if 'fullname' in session:
+        #user info
         
+        user_id=session['id']
+        cursor=mydb.connection.cursor()
+        cursor.execute(f'SELECT * FROM USERS WHERE USER_ID={cashier_id}')
+        user=cursor.fetchall()[0]
 
 
+        cursor.execute(f'SELECT COUNT(*) FROM TRANSACTION WHERE CASHIER_ID={cashier_id}')
+        Drugs_Sold=cursor.fetchall()[0][0]
 
-    return render_template('accounts.html',user=user,members_deleted=members_deleted,members_added=members_added,Suppliers_deleted=Suppliers_deleted,Suppliers_added=Suppliers_added,stocks_Deleted=stocks_Deleted,Drugs_added=Drugs_added,Drugs_deleted=Drugs_deleted,Drugs_Sold=Drugs_Sold,RestocksMade=RestocksMade)
+        cursor.execute(f'SELECT COUNT(*) FROM STOCK_TABLE WHERE STAFF_ID={cashier_id}')
+        RestocksMade=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT COUNT(*) FROM TRANSACTION WHERE CASHIER_ID={cashier_id}')
+        Drugs_Sold=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT COUNT(DRUG_ID) FROM USER_LOG WHERE USER_ID={cashier_id} AND ACTIVITY="DELETE" ')
+        Drugs_deleted=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT COUNT(DRUG_ID) FROM USER_LOG WHERE USER_ID={cashier_id} AND ACTIVITY="ADD" ')
+        Drugs_added=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT COUNT(STOCK_ID) FROM USER_LOG WHERE USER_ID={cashier_id} AND ACTIVITY="DELETE" ')
+        stocks_Deleted=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT COUNT(SUPPLIER_ID) FROM USER_LOG WHERE USER_ID={cashier_id} AND ACTIVITY="ADD" ')
+        Suppliers_added=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT COUNT(SUPPLIER_ID) FROM USER_LOG WHERE USER_ID={cashier_id} AND ACTIVITY="DELETE" ')
+        Suppliers_deleted=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT COUNT(MEMBER_ID) FROM USER_LOG WHERE USER_ID={cashier_id} AND ACTIVITY="ADD" ')
+        members_added=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT COUNT(MEMBER_ID) FROM USER_LOG WHERE USER_ID={cashier_id} AND ACTIVITY="DELETE" ')
+        members_deleted=cursor.fetchall()[0][0]
+
+        cursor.execute(f'SELECT * FROM USERS WHERE TITLE="CASHIER" ')
+        cashiers=cursor.fetchall()
+
+    else:
+        return redirect(url_for('signin'))
+    return render_template('cashiers.html',user_id=user_id,cashiers=cashiers,user=user,members_deleted=members_deleted,members_added=members_added,Suppliers_deleted=Suppliers_deleted,Suppliers_added=Suppliers_added,stocks_Deleted=stocks_Deleted,Drugs_added=Drugs_added,Drugs_deleted=Drugs_deleted,Drugs_Sold=Drugs_Sold,RestocksMade=RestocksMade)
+
+
+@app.route('/store',methods=['GET','POST'])
+def store():
+    cursor=mydb.connection.cursor()
+    cursor.execute('SELECT * FROM STOCK_TABLE')
+    stockdataDesc=cursor.fetchall()
+    cursor.execute('SELECT * FROM DRUG_DETAILS')
+    drug_details=cursor.fetchall()
+    print(stockdataDesc,drug_details)
+    #set expiry dates
+    today=datetime.date.today()
+    year=datetime.date.today().year
+    month=datetime.date.today().month+4
+    date=datetime.date.today().day
+    if month>12:
+        year=year+1
+        month=month-12
+    try:
+        expiry_range=datetime.date(year,month,date)
+    except:
+        expiry_range=datetime.date(year,month,25)
+    
+    return render_template('store.html',today=today,expiry_range=expiry_range,stockdataDesc=stockdataDesc,drug_details=drug_details)
 
 if __name__ == '__main__':
     app.run(debug=True)
