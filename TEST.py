@@ -86,7 +86,17 @@ def order():
                 Sold_items.append(sold_item)
                 #stockID,Quantity
             #update sales_table,rem_stock in stock,transaction,transaction_items
-            
+            #Ignore if blank
+            counter2=0
+            for item in Sold_items:
+                if int(item[1])>0:
+                    counter2=counter2+1
+                else:
+                    pass
+            if counter2 > 0:
+                pass
+            else:
+                return redirect(url_for('order'))
             #Get last Transaction_id
             cursor=mydb.connection.cursor()
             cursor.execute('SELECT TRANSACTION_ID FROM TRANSACTION')
@@ -104,8 +114,9 @@ def order():
             cursor.execute('SELECT * FROM STOCK_TABLE')
             last_stocks_data=cursor.fetchall()
             #Get Product cost for each ID
+            
             for stockID in Sold_items:
-                if int(stockID[1])==0:
+                if int(stockID[1]) == 0:
                     pass
                 else:
                     cursor=mydb.connection.cursor()

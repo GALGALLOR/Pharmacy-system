@@ -1,93 +1,94 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>User Account Home Page</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        .navbar {
-            background-color: #44aadd;
-            color: white;
-            padding: 10px 20px;
-        }
-        .navbar ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .navbar li {
-            margin: 0 15px;
-        }
-        .navbar li a {
-            text-decoration: none;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        .navbar li a:hover {
-            background-color: #56c483;
-        }
-        #container {
-            display: flex;
-            align-items: center;
-            padding: 20px;
-            background-color: #f1f1f1;
-        }
-        #profile-image {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            margin-right: 30px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        #user-details {
-            flex-grow: 1;
-            font-size: 16px;
-            color: #333;
-        }
-        #user-details h2 {
-            margin-top: 0;
-            font-size: 24px;
-            color: #444;
-        }
-        #user-details ul {
-            list-style: none;
-            padding: 0;
-        }
-        #user-details li {
-            margin-bottom: 10px;
-        }
-    </style>
+    <title>Fruit Quantity and Cost Calculator</title>
 </head>
 <body>
-    <div class="navbar">
-        <ul>
-            <li><a href="/order">ORDER</a></li>
-            <li><a href="/products">DRUGS</a></li>
-            <li><a href="/products">SUPPLIERS</a></li>
-            <li><a href="/accounts">ACCOUNT</a></li>
-            <li><a href="/sign_in">LOGOUT</a></li>
-        </ul>
+    <h1>Fruit Quantity and Cost Calculator</h1>
+    <table>
+        <tr>
+            <th>Fruit</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Quantity Remaining</th>
+        </tr>
+        <tr>
+            <td>Apple</td>
+            <td>
+                <input type="number" class="num-input" id="apple" min="0" max="10">
+            </td>
+            <td class="price-labels">0.5</td>
+            <td class="each-quantity">10</td>
+        </tr>
+        <tr>
+            <td>Banana</td>
+            <td>
+                <input type="number" class="num-input" id="banana" min="0" max="20">
+            </td>
+            <td class="price-labels">0.3</td>
+            <td class="each-quantity">20</td>
+        </tr>
+        <tr>
+            <td>Orange</td>
+            <td>
+                <input type="number" class="num-input" id="orange" min="0" max="15">
+            </td>
+            <td class="price-labels">0.4</td>
+            <td class="each-quantity">15</td>
+        </tr>
+        <tr>
+            <td>Grape</td>
+            <td>
+                <input type="number" class="num-input" id="grape" min="0" max="25">
+            </td>
+            <td class="price-labels">0.2</td>
+            <td class="each-quantity">25</td>
+        </tr>
+        <tr>
+            <td>Kiwi</td>
+            <td>
+                <input type="number" class="num-input" id="kiwi" min="0" max="12">
+            </td>
+            <td class="price-labels">0.6</td>
+            <td class="each-quantity">12</td>
+        </tr>
+    </table>
+    <div>
+        <label for="TotalCost">Total Cost: $</label>
+        <input type="number" id="TotalCost" readonly>
+        <h1 id="TotalCost2">$0.00</h1>
     </div>
-    <div id="container">
-        <img id="profile-image" src="https://via.placeholder.com/200" alt="Profile Image">
-        <div id="user-details">
-            <h2>Full Name : GALGALLO ROBA</h2>
-            <ul>
-                <li>ID Number: 123456789</li>
-                <li>Employment Date: July 15, 2022</li>
-                <li>Total Goods Sold: 250</li>
-                <li>STATUS: ON</li>
-                <!-- Add more details here if needed -->
-            </ul>
-        </div>
-    </div>
+
+    <script>
+        const numInputs = document.querySelectorAll('.num-input');
+        const totalCostInput = document.getElementById('TotalCost');
+        const totalCostDisplay = document.getElementById('TotalCost2');
+        const priceLabels = document.querySelectorAll('.price-labels');
+        const eachQuantities = document.querySelectorAll('.each-quantity');
+
+        numInputs.forEach((input, index) => {
+            input.addEventListener('input', () => {
+                calculateTotalCost(index);
+            });
+        });
+
+        function calculateTotalCost(index) {
+            let totalCost = 0;
+            numInputs.forEach((input, i) => {
+                const quantity = parseInt(input.value);
+                const price = parseFloat(priceLabels[i].textContent);
+                const remainingQuantity = parseInt(eachQuantities[i].textContent);
+                if (!isNaN(quantity)) {
+                    if (quantity > remainingQuantity) {
+                        alert("Max quantity reached");
+                        input.value = remainingQuantity;
+                    }
+                    totalCost += quantity * price;
+                }
+            });
+            totalCostInput.value = totalCost.toFixed(2);
+            totalCostDisplay.textContent = `$${totalCost.toFixed(2)}`;
+        }
+    </script>
 </body>
 </html>

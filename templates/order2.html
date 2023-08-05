@@ -89,6 +89,7 @@
         /* Button styles */
         label[for="startOrder"],
         label[for="cancelOrder"],
+        label[for="PartialPayLabel"],
         #OrderButton {
             padding: 10px 20px;
             background-color: #007bff;
@@ -99,6 +100,7 @@
 
         label[for="startOrder"]:hover,
         label[for="cancelOrder"]:hover,
+        label[for="PartialPayLabel"]:hover,
         #OrderButton:hover {
             background-color: #0056b3;
         }
@@ -236,15 +238,15 @@
                 <td>{{drug[3]}}</td>
                 <td>{{drug[2]}}</td>
                 <td>{{stock[4]}}</td>
-                <td id="F{{stock[0]}}" >{{stock[8]}}</td>
+                <td class="each-quantity" id="F{{stock[0]}}" >{{stock[8]}}</td>
                 <td>{{drug[4]}}</td>
                 <td>{{drug[5]}}</td>
-                <td>Ksh <span id="{{drug[7]}}" >
+                <td>Ksh <span class="price-label"  id="{{drug[7]}}" >
                     {{drug[7]}}
                     </span></td>
                 <td><span onclick="minus_cart('{{stock[0]}}','{{drug[7]}}')" class="minus" style="font-size: 50px;color:red;" >- </span>
                 
-                <input name="{{stock[0]}}" type="number" id="{{stock[0]}}" style="font-size:40px;border:none;border-bottom:1px solid black;width:2cm;" value="00" >
+                <input onchange="Add_to_total('{{stock[0]}}','{{drug[7]}}','F{{stock[0]}}')" class="num-input" name="{{stock[0]}}" type="number" id="{{stock[0]}}" style="font-size:30px;border:none;border-bottom:1px solid black;width:2cm;" value="0" >
                 
                      
                      <span onclick="add_cart('{{stock[0]}}','{{drug[7]}}','F{{stock[0]}}')" class="plus" style="font-size: 50px;color:rgb(0, 255, 0);" > +</span></td>
@@ -252,10 +254,16 @@
             
         </table>
         <div class="receipt">
-            Total Amount: <input type="number" style="font-size:50px;width:5cm;" name="TotalCost" id="TotalCost" value="00.00">
+            Total Amount: <h1 id="TotalCost2" >00.00</h1> <input type="number" style="display:none;font-size:50px;width:5cm;" name="TotalCost" id="TotalCost" value="00.00">
             <br>
             <label for="startOrder" id="cancelOrder">Cancel Button</label>
-            <button name="submit" value="buyNow">BUY NOW</button>
+            <button style="background:rgb(18, 92, 6)" name="submit" value="buyNow">BUY NOW</button><br><br><br>
+            <!--<input onclick="funclabel()" style="display:none;" type="checkbox" name="" id="PartialPayLabel">
+            <label for="PartialPayLabel" > PARTIAL PAY ? </label><br><br>
+            <span style="display:none;" id="PartialPaySpan" >
+            <input required placeholder="Enter Amount Paid" type="number" name="Paid" id="PaidPartial">
+            <button style="background:orange;" name="submit" value="partial_pay" > PARTIAL PAY </button>
+            </span> -->
         </div>
     </div>
     </form>
@@ -327,7 +335,9 @@
             itemQ1.value=Number(itemQ1.value)-1;
             //Subtract Subtotal(Unit Price & Quantity) from TotalCost
             var TotalCost=document.getElementById('TotalCost');
+            var TotalCost2=document.getElementById('TotalCost2');
             TotalCost.value=Number(TotalCost.value)-Number(itemP1.innerHTML);
+            TotalCost2.innerHTML='Ksh '+String(TotalCost.value)+'.00';
             };
         };
         function add_cart(itemQ,itemP,f){
@@ -343,9 +353,44 @@
            itemQ1.value=Number(itemQ1.value)+1;
            //Add Subtotal(Unit Price & Quantity) to TotalCost
            var TotalCost=document.getElementById('TotalCost');
+           var TotalCost2=document.getElementById('TotalCost2')
            TotalCost.value=Number(TotalCost.value)+Number(itemP1.innerHTML);
+           TotalCost2.innerHTML='Ksh '+String(TotalCost.value)+'.00';
            }
        };
+//Input function Order
+const numInputs = document.querySelectorAll('.num-input');
+        const totalCostInput = document.getElementById('TotalCost');
+        const totalCostDisplay = document.getElementById('TotalCost2');
+        const priceLabels = document.querySelectorAll('.price-label');
+        const eachQuantities = document.querySelectorAll('.each-quantity');
+
+        numInputs.forEach((input, index) => {
+            input.addEventListener('input', () => {
+                calculateTotalCost(index);
+            });
+        });
+
+        function calculateTotalCost(index) {
+            let totalCost = 0;
+            numInputs.forEach((input, i) => {
+                const quantity = parseInt(input.value);
+                const price = parseFloat(priceLabels[i].textContent);
+                const remainingQuantity = parseInt(eachQuantities[i].textContent);
+                if (!isNaN(quantity)) {
+                    if (quantity > remainingQuantity) {
+                        alert("Max quantity reached");
+                        input.value = remainingQuantity;
+                        totalCost += remainingQuantity * price;
+                    }
+                    else{
+                    totalCost += quantity * price;
+                    }
+                }
+            });
+            totalCostInput.value = totalCost.toFixed(2);
+            totalCostDisplay.textContent = `Ksh ${totalCost.toFixed(2)}`;
+        };
        //Search Engine Code
 const searchInput = document.getElementById('searchBar');
 const itemTable = document.getElementById('itemTable');
@@ -378,10 +423,22 @@ function filterItems() {
 //cancel Order
 document.getElementById("cancelOrder").addEventListener("click", function() {
             document.getElementById("TotalCost").value = "00.00";
+            document.getElementById("TotalCost2").innerHTML = "00.00";
             const quantityInputs = document.querySelectorAll('input[type="number"]');
             quantityInputs.forEach(input => input.value = "0");
         });
-
+         // Start Order
+        
+        function funclabel(){
+            var button=document.getElementById("PartialPayLabel");
+            var span=document.getElementById("PartialPaySpan");
+            if(button.checked==true){
+                span.style.display='block';
+            }
+            else{
+                span.style.display='none';
+            };
+        };
 
     </script>
 </body>
