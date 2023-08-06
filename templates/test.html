@@ -19,28 +19,28 @@
         body table{
             margin:1cm;
         }
-        .LabelTable label {
+        #Labeltable1,#Labeltable2 {
             padding: 8px 16px;
-          
+            margin:1cm;
             border: 1px solid #44aadd;
-            background-color: #44aadd;
+            background: #44aadd;
             color: white;
             cursor: pointer;
             border-radius: 5px 5px 0 0;
         }
 
         /* Hover effect for the label */
-        .LabelTable label:hover {
+        #Labeltable1:hover,#Labeltable2:hover {
             background-color: #56c483;
             border-color: #56c483;
         }
     </style>
 </head>
 <body>
-    <input type="radio" name="labels" id="table1" onclick="toggleTable('medicationsTable', 'suppliersTable')">
-    <input type="radio" name="labels" id="table2" onclick="toggleTable('suppliersTable', 'medicationsTable')">
+    <input style="display:none;" type="radio" name="labels" id="table1" onclick="toggleTable('medicationsTable','Labeltable1', 'suppliersTable','Labeltable2')">
+    <input style="display:none;" type="radio" name="labels" id="table2" onclick="toggleTable('suppliersTable','Labeltable2', 'medicationsTable','Labeltable1')">
     
-    <label class="LabelTable" for="table1" id="Labeltable1" >Medications Table</label>
+    <label style="background:#56c483;" class="LabelTable" for="table1" id="Labeltable1" >Medications Table</label>
     <label class="LabelTable" for="table2" id="Labeltable2" >Suppliers Table</label>
     
 <table id="medicationsTable">
@@ -66,7 +66,7 @@
 </table>
 
 
-<table id="suppliersTable">
+<table style="display:none;" id="suppliersTable">
     <tr>
         <th onclick="sortTable('suppliersTable', 0)">Supplier Name</th>
         <th onclick="sortTable('suppliersTable', 1)">Location</th>
@@ -90,13 +90,17 @@
 
 <script>
 //funcTable
-function toggleTable(showTableId, hideTableId) {
+function toggleTable(showTableId,ColorLabelId, hideTableId,DiscolorLabelId) {
     const showTable = document.getElementById(showTableId);
     const hideTable = document.getElementById(hideTableId);
+    const ColorLabel = document.getElementById(ColorLabelId);
+    const DiscolorLabel = document.getElementById(DiscolorLabelId);
     
     if (showTable && hideTable) {
         showTable.style.display = 'table';
         hideTable.style.display = 'none';
+        ColorLabel.style.background='#56c483';
+        DiscolorLabel.style.background='#44aadd';
     }
 }
 

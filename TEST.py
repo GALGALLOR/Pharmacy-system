@@ -494,29 +494,9 @@ def accounts_cashier(cashier_id):
 @app.route('/store',methods=['GET','POST'])
 def store():
     cursor=mydb.connection.cursor()
-    cursor.execute('SELECT * FROM STOCK_TABLE')
-    stockdataDesc=cursor.fetchall()
-    cursor.execute('SELECT * FROM DRUG_DETAILS')
-    drug_details=cursor.fetchall()
-    print(stockdataDesc,drug_details)
-    #set expiry dates
-    today=datetime.date.today()
-    year=datetime.date.today().year
-    month=datetime.date.today().month+4
-    date=datetime.date.today().day
-    if month>12:
-        year=year+1
-        month=month-12
-    try:
-        expiry_range=datetime.date(year,month,date)
-    except:
-        expiry_range=datetime.date(year,month,25)
-    
-    return render_template('store.html',today=today,expiry_range=expiry_range,stockdataDesc=stockdataDesc,drug_details=drug_details)
-
-@app.route('/suppliers',methods=['GET','POST'])
-def suppliers():
-    cursor=mydb.connection.cursor()
+    #Suppliers
+    cursor.execute('SELECT * FROM SUPPLIERS ORDER BY SUPPLIER_ID DESC')
+    supplier_data=cursor.fetchall()
     #stock_id desc
     cursor.execute('SELECT * FROM STOCK_TABLE ORDER BY STOCK_ID DESC')
     stockdataDesc=cursor.fetchall()
@@ -537,7 +517,7 @@ def suppliers():
     except:
         expiry_range=datetime.date(year,month,25)
     
-    return render_template('suppliers.html',today=today,expiry_range=expiry_range,stockdataDesc=stockdataDesc,drug_details=drug_details)
+    return render_template('store.html',supplier_data=supplier_data,today=today,expiry_range=expiry_range,stockdataDesc=stockdataDesc,drug_details=drug_details)
 
 
 if __name__ == '__main__':

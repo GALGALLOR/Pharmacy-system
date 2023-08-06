@@ -29,9 +29,9 @@
         }
 
         #searchBar {
-            padding: 5px;
+            padding: 10px;
             width: 100%;
-            margin: 10px 0;
+            margin: 20px 0;
             border: 1px solid #ccc;
             border-radius: 1cm;
         }
@@ -162,6 +162,7 @@
             background-color: #44aadd;
             color: white;
             padding:25px 20px;
+            margin:0 0 0.5cm 0;
         }
 
         .navbar ul {
@@ -188,6 +189,24 @@
         .navbar li a:hover {
             background-color: #56c483;
         }
+        body table{
+            margin:1cm;
+        }
+        #Labeltable1,#Labeltable2 {
+            padding: 8px 16px;
+            margin:1cm;
+            border: 1px solid #44aadd;
+            background: #44aadd;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+        }
+
+        /* Hover effect for the label */
+        #Labeltable1:hover,#Labeltable2:hover {
+            background-color: #56c483;
+            border-color: #56c483;
+        }
     </style>
 </head>
 <body>
@@ -202,24 +221,28 @@
         </ul>
     </div>
 
-
+    <input style="display:none;" type="radio" name="labels" id="table1" onclick="toggleTable('itemTable','Labeltable1', 'suppliersTable','Labeltable2')">
+    <input style="display:none;" type="radio" name="labels" id="table2" onclick="toggleTable('suppliersTable','Labeltable2', 'itemTable','Labeltable1')">
+    
+    <label style="background:#56c483;" class="LabelTable" for="table1" id="Labeltable1" >Medications Table</label>
+    <label class="LabelTable" for="table2" id="Labeltable2" >Suppliers Table</label>
 
 
 <form  id="cont4" method="post">
     <div class="container">
-    <input placeholder="ENTER DRUG NAME/BRAND" type="text" name="searchBar" id="searchBar">
+    <input placeholder="search Drug/supplier info" type="text" name="searchBar" id="searchBar">
     <table class="itemTable" id="itemTable">
         <tr>
-            <th onclick="sortTable(0)" >Check</th>
-            <th onclick="sortTable(1)" >Stock ID</th>
-            <th onclick="sortTable(2)" >Drug Name</th>
-            <th onclick="sortTable(3)" >Brand</th>
-            <th onclick="sortTable(4)" >Category</th>
-            <th onclick="sortTable(5)" >Stock Date</th>
-            <th onclick="sortTable(6)" >Expiry Date</th>
-            <th onclick="sortTable(7)" >Quantity</th>
-            <th onclick="sortTable(8)" >Staff ID</th>
-            <th onclick="sortTable(9)" >Buying Price</th>
+            <th onclick="sortTable( 'itemTable', 0)" >Check</th>
+            <th onclick="sortTable( 'itemTable', 1)" >Stock ID</th>
+            <th onclick="sortTable( 'itemTable', 2)" >Drug Name</th>
+            <th onclick="sortTable( 'itemTable', 3)" >Brand</th>
+            <th onclick="sortTable( 'itemTable', 4)" >Category</th>
+            <th onclick="sortTable( 'itemTable', 5)" >Stock Date</th>
+            <th onclick="sortTable( 'itemTable', 6)" >Expiry Date</th>
+            <th onclick="sortTable( 'itemTable', 7)" >Quantity</th>
+            <th onclick="sortTable( 'itemTable', 8)" >Staff ID</th>
+            <th onclick="sortTable( 'itemTable', 9)" >Buying Price</th>
         </tr>
         {%for stock in stockdataDesc %}
         <!-- Make Red if expired -->
@@ -251,21 +274,65 @@
         </tr>
         {%endfor%}
     </table>
+
+    <table style="display:none;" class="itemTable" id="suppliersTable">
+        <tr>
+            <th onclick="sortTable('suppliersTable', 0)">Check</th>
+            <th onclick="sortTable('suppliersTable', 1)">Supplier ID</th>
+            <th onclick="sortTable('suppliersTable', 2)">Supplier Name</th>
+            <th onclick="sortTable('suppliersTable', 3)">Contact</th>
+            <th onclick="sortTable('suppliersTable', 4)">Location</th>
+        </tr>
+        {%for supplier in supplier_data%}
+        <tr>
+            <td> <input type="radio" name="suppliers" id="Sup{{supplier[0]}}"> </td>
+            <td>{{supplier[0]}}</td>
+            <td>{{supplier[1]}}</td>
+            <td>{{supplier[2]}}</td>
+            <td>{{supplier[3]}}</td>
+        </tr>
+        {%endfor%}
+        
+        
+        <!-- ... (other suppliers data rows) ... -->
+    </table>
+
     </div>
 </form>
 
-<script>
-const sortOrders = [0, 0, 0,0,0,0,0,0,0,0]; // 0: ascending, 1: descending
 
-function sortTable(columnIndex) {
-    const table = document.getElementById("itemTable");
+
+
+<script>
+//funcorder
+function toggleTable(showTableId,ColorLabelId, hideTableId,DiscolorLabelId) {
+    const showTable = document.getElementById(showTableId);
+    const hideTable = document.getElementById(hideTableId);
+    const ColorLabel = document.getElementById(ColorLabelId);
+    const DiscolorLabel = document.getElementById(DiscolorLabelId);
+    
+    if (showTable && hideTable) {
+        showTable.style.display = 'table';
+        hideTable.style.display = 'none';
+        ColorLabel.style.background='#56c483';
+        DiscolorLabel.style.background='#44aadd';
+    }
+}
+//end of func order
+
+const sortOrders = {};
+
+function sortTable(tableId, columnIndex) {
+    const table = document.getElementById(tableId);
     const rows = Array.from(table.rows);
 
-    // Exclude the header row from sorting
     const dataRows = rows.slice(1);
 
-    // Toggle sorting order for the clicked column
-    sortOrders[columnIndex] = 1 - sortOrders[columnIndex];
+    if (!sortOrders[tableId]) {
+        sortOrders[tableId] = Array(dataRows[0].cells.length).fill(0);
+    }
+
+    sortOrders[tableId][columnIndex] = 1 - sortOrders[tableId][columnIndex];
 
     dataRows.sort((a, b) => {
         const aValue = a.cells[columnIndex].textContent;
@@ -273,14 +340,14 @@ function sortTable(columnIndex) {
 
         let comparison;
 
-        if (columnIndex === 1) { // Handle numeric values for the Age column
-            comparison = parseInt(aValue) - parseInt(bValue);
-        } else {
+        if (isNaN(aValue)) {
             comparison = aValue.localeCompare(bValue, undefined, { numeric: true, sensitivity: 'base' });
+        } else {
+            comparison = parseFloat(aValue) - parseFloat(bValue);
         }
 
-        if (sortOrders[columnIndex] === 1) {
-            comparison *= -1; // Reverse the comparison for descending order
+        if (sortOrders[tableId][columnIndex] === 1) {
+            comparison *= -1;
         }
 
         return comparison;
@@ -290,12 +357,10 @@ function sortTable(columnIndex) {
         table.removeChild(table.firstChild);
     }
 
-    // Append the header row back
     table.appendChild(rows[0]);
 
     dataRows.forEach(row => table.appendChild(row));
 }
-
 
     //Selling Price autoUpdate
     function sp_autoupdate(drugid,drugcost){
@@ -311,12 +376,40 @@ function sortTable(columnIndex) {
     const itemTable = document.getElementById('itemTable');
     const rows = itemTable.getElementsByTagName('tr');
 
-    searchInput.addEventListener('input', filterItems3);
+    searchInput.addEventListener('input', filterItems);
 
-    function filterItems3() {
+    function filterItems() {
         const searchTerm = searchInput.value.toLowerCase();
         for (let i = 1; i < rows.length; i++) { // Start the loop from index 1 to skip the header row
             const row = rows[i];
+            const cells = row.getElementsByTagName('td');
+            let matchFound = false;
+
+            for (const cell of cells) {
+                const cellValue = cell.textContent.toLowerCase();
+                if (cellValue.includes(searchTerm)) {
+                    matchFound = true;
+                    break;
+                }
+            }
+
+            if (matchFound) {
+                row.style.display = 'table-row';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    };
+    //Suppliers Table
+    const supplierstable = document.getElementById('suppliersTable');
+    const rows2 = supplierstable.getElementsByTagName('tr');
+
+    searchInput.addEventListener('input', filterItems2);
+
+    function filterItems2() {
+        const searchTerm = searchInput.value.toLowerCase();
+        for (let i = 1; i < rows2.length; i++) { // Start the loop from index 1 to skip the header row
+            const row = rows2[i];
             const cells = row.getElementsByTagName('td');
             let matchFound = false;
 
