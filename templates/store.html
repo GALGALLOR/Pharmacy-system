@@ -238,14 +238,15 @@
         <tr>
             <th onclick="sortTable( 'itemTable', 0)" >Check</th>
             <th onclick="sortTable( 'itemTable', 1)" >Stock ID</th>
-            <th onclick="sortTable( 'itemTable', 2)" >Drug Name</th>
-            <th onclick="sortTable( 'itemTable', 3)" >Brand</th>
+            <th onclick="sortTable( 'itemTable', 2)" >Drug Brand</th>
+            <th onclick="sortTable( 'itemTable', 3)" >Components</th>
             <th onclick="sortTable( 'itemTable', 4)" >Category</th>
-            <th onclick="sortTable( 'itemTable', 5)" >Stock Date</th>
-            <th onclick="sortTable( 'itemTable', 6)" >Expiry Date</th>
-            <th onclick="sortTable( 'itemTable', 7)" >Quantity</th>
-            <th onclick="sortTable( 'itemTable', 8)" >Staff ID</th>
-            <th onclick="sortTable( 'itemTable', 9)" >Buying Price</th>
+            <th onclick="sortTable( 'itemTable', 5)" >Mode</th>
+            <th onclick="sortTable( 'itemTable', 6)" >Stock Date</th>
+            <th onclick="sortTable( 'itemTable', 7)" >Expiry Date</th>
+            <th onclick="sortTable( 'itemTable', 8)" >Quantity</th>
+            <th onclick="sortTable( 'itemTable', 9)" >Staff ID</th>
+            <th onclick="sortTable( 'itemTable', 10)" >Buying Price</th>
         </tr>
         {%for stock in stockdataDesc %}
         <!-- Make Red if expired -->
@@ -264,9 +265,10 @@
             <td> <label for="DelStock{{stock[0]}}">{{stock[0]}} </label></td>
             {%for drug in drug_details%}
                 {%if drug[0]==stock[1]%}
-            <td> <label for="DelStock{{stock[0]}}">{{drug[1]}}</label></td>
-            <td> <label for="DelStock{{stock[0]}}">{{drug[3]}} </label></td>
+            <td> <label for="DelStock{{stock[0]}}">{{drug[3]}}</label></td>
+            <td> <label for="DelStock{{stock[0]}}">{{drug[1]}} </label></td>
             <td> <label for="DelStock{{stock[0]}}">{{drug[2]}} </label></td>
+            <td> <label for="DelStock{{stock[0]}}">{{drug[8]}} </label></td>
             {%endif%}
             {%endfor%}
             <td> <label for="DelStock{{stock[0]}}">{{stock[3]}} </label></td>

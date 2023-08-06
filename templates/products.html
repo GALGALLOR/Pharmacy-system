@@ -47,7 +47,7 @@
 
         /* Container styles */
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 50px auto;
             background-color: #ffffff;
             border: 1px solid #ccc;
@@ -164,9 +164,10 @@
                 <tr>
                     <th>Check</th>
                     <th>Drug ID</th>
-                    <th>Drug Name</th>
-                    <th>Brand</th>
+                    <th>Drug Brand</th>
+                    <th>Components</th>
                     <th>Category</th>
+                    <th>Mode</th>
                     <th>Dosage</th>
                     <th>Strength</th>
                     <th>cost</th>
@@ -175,9 +176,10 @@
                 <tr>
                     <td><input onclick="sp_autoupdate('drug{{drug[0]}}','{{drug[7]}}')" required type="radio" name="drugId" value="{{drug[0]}}" id="drug{{drug[0]}}"></td>
                     <td> <label for="drug{{drug[0]}}"> {{drug[0]}}</label></td>
-                    <td> <label for="drug{{drug[0]}}"> {{drug[1]}}</label></td>
                     <td> <label for="drug{{drug[0]}}"> {{drug[3]}}</label></td>
+                    <td> <label for="drug{{drug[0]}}"> {{drug[1]}}</label></td>
                     <td> <label for="drug{{drug[0]}}"> {{drug[2]}}</label></td>
+                    <td> <label for="drug{{drug[0]}}"> {{drug[8]}} </label> </td>
                     <td> <label for="drug{{drug[0]}}"> {{drug[4]}}</label></td>
                     <td> <label for="drug{{drug[0]}}"> {{drug[5]}}</label></td>
                     <td> <label for="drug{{drug[0]}}">Ksh {{drug[7]}}</label></td>
@@ -208,9 +210,11 @@
         <form id="cont2" style="display:none;" method="post">
 
             <table>
-                <tr><td><label for="">Drug Name:</label>     </td><td style="width:100%;" ><input required  type="text" name="drugName" ><br></td></tr>
+                
                 <tr><td><label for="">Drug Brand: </label></td><td style="width:100%;" ><input required  name="drugBrand" type="text"><br></td></tr>
+                <tr><td><label for="">Drug Components:</label>     </td><td style="width:100%;" ><input required  type="text" name="drugName" ><br></td></tr>
                 <tr><td><label for="">Drug Category:</label></td><td style="width:100%;" ><input required  name="drugCategory" type="text"><br></td></tr>
+                <tr><td><label for="">Mode of Usage:</label>     </td><td style="width:100%;" ><input required  type="text" name="mode" ><br></td></tr>
                 <tr><td><label for="">Dosage : </label></td><td style="width:100%;" ><input required  type="text" name="dosage"><br></td></tr>
                 <tr><td><label for="">Drug Strength : </label></td><td style="width:100%;" ><input required  type="text" name="drugStrength" ><br></td></tr>
                 <tr><td><label for="">To-sell price : </label></td><td style="width:100%;" ><input required  type="number" name="drugCost"><br></td></tr>
@@ -248,6 +252,7 @@
                     <th>Drug Name</th>
                     <th>Brand</th>
                     <th>Category</th>
+                    <th>Mode</th>
                     <th>Dosage</th>
                     <th>Strength</th>
                     <th>Unit Price</th>
@@ -259,6 +264,7 @@
                     <td> <label for="delete{{drug[0]}}"> {{drug[1]}}</label></td>
                     <td> <label for="delete{{drug[0]}}"> {{drug[3]}}</label></td>
                     <td> <label for="delete{{drug[0]}}"> {{drug[2]}}</label></td>
+                    <td> <label for="delete{{drug[0]}}"> {{drug[8]}}</label></td>
                     <td> <label for="delete{{drug[0]}}"> {{drug[4]}}</label></td>
                     <td> <label for="delete{{drug[0]}}"> {{drug[5]}}</label></td>
                     <td> <label for="delete{{drug[0]}}"> Ksh {{drug[7]}}</label></td>
@@ -279,9 +285,10 @@
                 <tr>
                     <th>Check</th>
                     <th>Stock ID</th>
-                    <th>Drug Name</th>
-                    <th>Brand</th>
+                    <th>Drug Brand</th>
+                    <th>Components</th>
                     <th>Category</th>
+                    <th>Mode</th>
                     <th>Stock Date</th>
                     <th>Expiry Date</th>
                     <th>Quantity</th>
@@ -305,9 +312,11 @@
                     <td> <label for="DelStock{{stock[0]}}">{{stock[0]}} </label></td>
                     {%for drug in drug_details%}
                         {%if drug[0]==stock[1]%}
-                    <td> <label for="DelStock{{stock[0]}}">{{drug[1]}}</label></td>
-                    <td> <label for="DelStock{{stock[0]}}">{{drug[3]}} </label></td>
+                    <td> <label for="DelStock{{stock[0]}}">{{drug[3]}}</label></td>
+                    <td> <label for="DelStock{{stock[0]}}">{{drug[1]}} </label></td>
                     <td> <label for="DelStock{{stock[0]}}">{{drug[2]}} </label></td>
+                    <td> <label for="DelStock{{stock[0]}}"> {{drug[8]}}</label></td>
+
                     {%endif%}
                     {%endfor%}
                     <td> <label for="DelStock{{stock[0]}}">{{stock[3]}} </label></td>

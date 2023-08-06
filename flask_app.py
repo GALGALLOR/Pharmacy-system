@@ -6,10 +6,10 @@ import datetime
 
 mydb=MySQL(app)
 
-"""app.config['MYSQL_HOST']=''
-app.config['MYSQL_USER']=''
-app.config['MYSQL_PASSWORD']=''
-app.config['MYSQL_DB']=''"""
+"""app.config['MYSQL_HOST']='PharmacyBG.mysql.pythonanywhere-services.com'
+app.config['MYSQL_USER']='PharmacyBG'
+app.config['MYSQL_PASSWORD']='GALGALLO10'
+app.config['MYSQL_DB']='PharmacyBG$default'"""
 
 app.config['MYSQL_HOST']='localhost'
 app.config['MYSQL_USER']='root'
@@ -72,8 +72,18 @@ def signin():
 def order():
     if 'fullname' in session:
         fullname=session['fullname']
+        cursor=mydb.connection.cursor()
+        cursor.execute('SELECT * from TRANSACTION WHERE PARTIAL_PAY="YES"')
+        partial_pay_data=cursor.fetchall()
+        
         if request.method=='POST':
             submit=str(request.form['submit'])
+            #PAY OFF DEBT
+            if str(submit)=="partial_pay_now":
+                Transaction_id = int(request.form['Tid'])
+                cursor.execute(f'UPDATE TRANSACTION SET PARTIAL_PAY="NO" WHERE TRANSACTION_ID={Transaction_id}')
+                mydb.connection.commit()
+                return redirect(url_for('order'))
             #get each itemID and its Quantity bought
             cursor=mydb.connection.cursor()
             cursor.execute('SELECT * from STOCK_TABLE')
@@ -152,9 +162,24 @@ def order():
                     mydb.connection.commit()
 
             #insert transaction
-            id_number=str(session['id'])
-            cursor.execute('INSERT INTO TRANSACTION(TRANSACTION_ID,CASHIER_ID,SALE_DATE,TOTAL_SALES)VALUES(%s,%s,%s,%s)',(last_transaction_id,id_number,sale_date,total_cost))
-            mydb.connection.commit()
+            if submit=='partial_pay':
+                try:
+                    customer_name=str(request.form['Customer_name'])
+                    amount_paid=str(request.form['Amount_Paid'])
+                    amount_rem=int(total_cost)-int(amount_paid)
+                    id_number=str(session['id'])
+                    cursor.execute('INSERT INTO TRANSACTION(TRANSACTION_ID,CASHIER_ID,SALE_DATE,TOTAL_SALES,PARTIAL_PAY,PARTIAL_PAYER,AMOUNT_REM)VALUES(%s,%s,%s,%s,%s,%s,%s)',(last_transaction_id,id_number,sale_date,total_cost,'YES',customer_name,amount_rem))
+                    mydb.connection.commit()
+                except:
+                    pass
+
+            else:
+                id_number=str(session['id'])
+                cursor.execute('INSERT INTO TRANSACTION(TRANSACTION_ID,CASHIER_ID,SALE_DATE,TOTAL_SALES,PARTIAL_PAY)VALUES(%s,%s,%s,%s,%s)',(last_transaction_id,id_number,sale_date,total_cost,'NO'))
+                mydb.connection.commit()
+            return redirect(url_for('order'))
+
+            
         else:
             pass            
                         
@@ -164,15 +189,14 @@ def order():
     
     #list down past transactions
     cursor=mydb.connection.cursor()
-    cursor.execute('SELECT * FROM TRANSACTION ORDER BY TRANSACTION_ID DESC')
+    cursor.execute('SELECT * FROM TRANSACTION WHERE PARTIAL_PAY="NO" ORDER BY TRANSACTION_ID DESC ')
     past_transactions=cursor.fetchall()
     cursor.execute('SELECT * FROM TRANSACTION_ITEMS')
     past_transaction_items=cursor.fetchall()
-    #list Down DrugDetails,inventory & stock
+    #list Down DrugDetails & stock
     cursor.execute('SELECT * FROM DRUG_DETAILS')
     drug_details=cursor.fetchall()
-    cursor.execute('SELECT QUANTITY FROM INVENTORY')
-    inventory=cursor.fetchall()
+    
     cursor.execute('SELECT * FROM STOCK_TABLE')
     stocks=cursor.fetchall()
     #set expiry dates
@@ -188,7 +212,7 @@ def order():
     except:
         expiry_range=datetime.date(year,month,25)
 
-    return render_template('order2.html',stocks=stocks,drug_details=drug_details, past_transaction_items=past_transaction_items,past_transactions=past_transactions,today=today,expiry_range=expiry_range)
+    return render_template('order2.html',partial_pay_data=partial_pay_data,stocks=stocks,drug_details=drug_details, past_transaction_items=past_transaction_items,past_transactions=past_transactions,today=today,expiry_range=expiry_range)
 
 @app.route('/products' ,methods=['POST','GET'] )
 def products():
@@ -279,6 +303,7 @@ def products():
                 DrugDosage=request.form['dosage']
                 DrugStrength=request.form['drugStrength']
                 DrugCost=request.form['drugCost']
+                mode=request.form['mode']
                 presence='no'
                 for drugs in drug_details:
                     if DrugName==drugs[1]:
@@ -286,7 +311,7 @@ def products():
                             if DrugBrand==drugs[3]:
                                 presence='yes'
                 if presence=='no':
-                    cursor.execute('INSERT INTO DRUG_DETAILS(DRUG_ID,DRUG_NAME,CATEGORY,BRAND,DOSAGE,STRENGTH,STATUS,COST)VALUES(%s,%s,%s,%s,%s,%s,%s,%s)',(DrugId,DrugName,DrugCategory,DrugBrand,DrugDosage,DrugStrength,'yes',DrugCost))
+                    cursor.execute('INSERT INTO DRUG_DETAILS(DRUG_ID,DRUG_NAME,CATEGORY,BRAND,DOSAGE,STRENGTH,STATUS,COST,MODE)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)',(DrugId,DrugName,DrugCategory,DrugBrand,DrugDosage,DrugStrength,'yes',DrugCost,mode))
                     mydb.connection.commit()
                     #Update UserLog
                     cursor.execute('SELECT * FROM USER_LOG ORDER BY LOG_ID DESC')
@@ -495,8 +520,13 @@ def accounts_cashier(cashier_id):
 @app.route('/store',methods=['GET','POST'])
 def store():
     cursor=mydb.connection.cursor()
-    cursor.execute('SELECT * FROM STOCK_TABLE')
+    #Suppliers
+    cursor.execute('SELECT * FROM SUPPLIERS ORDER BY SUPPLIER_ID DESC')
+    supplier_data=cursor.fetchall()
+    #stock_id desc
+    cursor.execute('SELECT * FROM STOCK_TABLE ORDER BY STOCK_ID DESC')
     stockdataDesc=cursor.fetchall()
+
     cursor.execute('SELECT * FROM DRUG_DETAILS')
     drug_details=cursor.fetchall()
     print(stockdataDesc,drug_details)
@@ -513,7 +543,8 @@ def store():
     except:
         expiry_range=datetime.date(year,month,25)
     
-    return render_template('store.html',today=today,expiry_range=expiry_range,stockdataDesc=stockdataDesc,drug_details=drug_details)
+    return render_template('store.html',supplier_data=supplier_data,today=today,expiry_range=expiry_range,stockdataDesc=stockdataDesc,drug_details=drug_details)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
