@@ -195,8 +195,8 @@
     <div class="navbar">
         <ul>
             <li><a href="/order">ORDER</a></li>
-            <li><a href="/products">DRUGS</a></li>
-            <li><a style="background-color: #56c483;" href="/store">STORE</a></li>
+            <li><a href="/products">MANAGE</a></li>
+            <li><a href="/supplier">STORE</a></li>
             <li><a href="/accounts">ACCOUNT</a></li>
             <li><a href="/sign_in">LOGOUT</a></li>
         </ul>
@@ -210,16 +210,16 @@
     <input placeholder="ENTER DRUG NAME/BRAND" type="text" name="searchBar" id="searchBar">
     <table class="itemTable" id="itemTable">
         <tr>
-            <th>Check</th>
-            <th>Stock ID</th>
-            <th>Drug Name</th>
-            <th>Brand</th>
-            <th>Category</th>
-            <th>Stock Date</th>
-            <th>Expiry Date</th>
-            <th>Quantity</th>
-            <th>Staff ID</th>
-            <th>Buying Price</th>
+            <th onclick="sortTable(0)" >Check</th>
+            <th onclick="sortTable(1)" >Stock ID</th>
+            <th onclick="sortTable(2)" >Drug Name</th>
+            <th onclick="sortTable(3)" >Brand</th>
+            <th onclick="sortTable(4)" >Category</th>
+            <th onclick="sortTable(5)" >Stock Date</th>
+            <th onclick="sortTable(6)" >Expiry Date</th>
+            <th onclick="sortTable(7)" >Quantity</th>
+            <th onclick="sortTable(8)" >Staff ID</th>
+            <th onclick="sortTable(9)" >Buying Price</th>
         </tr>
         {%for stock in stockdataDesc %}
         <!-- Make Red if expired -->
@@ -255,6 +255,48 @@
 </form>
 
 <script>
+const sortOrders = [0, 0, 0,0,0,0,0,0,0,0]; // 0: ascending, 1: descending
+
+function sortTable(columnIndex) {
+    const table = document.getElementById("itemTable");
+    const rows = Array.from(table.rows);
+
+    // Exclude the header row from sorting
+    const dataRows = rows.slice(1);
+
+    // Toggle sorting order for the clicked column
+    sortOrders[columnIndex] = 1 - sortOrders[columnIndex];
+
+    dataRows.sort((a, b) => {
+        const aValue = a.cells[columnIndex].textContent;
+        const bValue = b.cells[columnIndex].textContent;
+
+        let comparison;
+
+        if (columnIndex === 1) { // Handle numeric values for the Age column
+            comparison = parseInt(aValue) - parseInt(bValue);
+        } else {
+            comparison = aValue.localeCompare(bValue, undefined, { numeric: true, sensitivity: 'base' });
+        }
+
+        if (sortOrders[columnIndex] === 1) {
+            comparison *= -1; // Reverse the comparison for descending order
+        }
+
+        return comparison;
+    });
+
+    while (table.firstChild) {
+        table.removeChild(table.firstChild);
+    }
+
+    // Append the header row back
+    table.appendChild(rows[0]);
+
+    dataRows.forEach(row => table.appendChild(row));
+}
+
+
     //Selling Price autoUpdate
     function sp_autoupdate(drugid,drugcost){
         var drugidvar=document.getElementById(drugid);
@@ -265,16 +307,16 @@
     };
     
     //Search Engine Code
-    const searchInput3 = document.getElementById('searchBar');
-    const itemTable3 = document.getElementById('itemTable');
-    const rows3 = itemTable3.getElementsByTagName('tr');
+    const searchInput = document.getElementById('searchBar');
+    const itemTable = document.getElementById('itemTable');
+    const rows = itemTable.getElementsByTagName('tr');
 
-    searchInput3.addEventListener('input', filterItems3);
+    searchInput.addEventListener('input', filterItems3);
 
     function filterItems3() {
-        const searchTerm = searchInput3.value.toLowerCase();
-        for (let i = 1; i < rows3.length; i++) { // Start the loop from index 1 to skip the header row
-            const row = rows3[i];
+        const searchTerm = searchInput.value.toLowerCase();
+        for (let i = 1; i < rows.length; i++) { // Start the loop from index 1 to skip the header row
+            const row = rows[i];
             const cells = row.getElementsByTagName('td');
             let matchFound = false;
 

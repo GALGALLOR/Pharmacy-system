@@ -6,10 +6,10 @@ import datetime
 
 mydb=MySQL(app)
 
-"""app.config['MYSQL_HOST']=''
-app.config['MYSQL_USER']=''
-app.config['MYSQL_PASSWORD']=''
-app.config['MYSQL_DB']=''"""
+"""app.config['MYSQL_HOST']='PharmacyBG.mysql.pythonanywhere-services.com'
+app.config['MYSQL_USER']='PharmacyBG'
+app.config['MYSQL_PASSWORD']='GALGALLO10'
+app.config['MYSQL_DB']='PharmacyBG$default'"""
 
 app.config['MYSQL_HOST']='localhost'
 app.config['MYSQL_USER']='root'
@@ -168,11 +168,10 @@ def order():
     past_transactions=cursor.fetchall()
     cursor.execute('SELECT * FROM TRANSACTION_ITEMS')
     past_transaction_items=cursor.fetchall()
-    #list Down DrugDetails,inventory & stock
+    #list Down DrugDetails & stock
     cursor.execute('SELECT * FROM DRUG_DETAILS')
     drug_details=cursor.fetchall()
-    cursor.execute('SELECT QUANTITY FROM INVENTORY')
-    inventory=cursor.fetchall()
+    
     cursor.execute('SELECT * FROM STOCK_TABLE')
     stocks=cursor.fetchall()
     #set expiry dates
@@ -514,6 +513,32 @@ def store():
         expiry_range=datetime.date(year,month,25)
     
     return render_template('store.html',today=today,expiry_range=expiry_range,stockdataDesc=stockdataDesc,drug_details=drug_details)
+
+@app.route('/suppliers',methods=['GET','POST'])
+def suppliers():
+    cursor=mydb.connection.cursor()
+    #stock_id desc
+    cursor.execute('SELECT * FROM STOCK_TABLE ORDER BY STOCK_ID DESC')
+    stockdataDesc=cursor.fetchall()
+
+    cursor.execute('SELECT * FROM DRUG_DETAILS')
+    drug_details=cursor.fetchall()
+    print(stockdataDesc,drug_details)
+    #set expiry dates
+    today=datetime.date.today()
+    year=datetime.date.today().year
+    month=datetime.date.today().month+4
+    date=datetime.date.today().day
+    if month>12:
+        year=year+1
+        month=month-12
+    try:
+        expiry_range=datetime.date(year,month,date)
+    except:
+        expiry_range=datetime.date(year,month,25)
+    
+    return render_template('suppliers.html',today=today,expiry_range=expiry_range,stockdataDesc=stockdataDesc,drug_details=drug_details)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
