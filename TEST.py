@@ -226,8 +226,10 @@ def order():
         expiry_range=datetime.date(year,month,date)
     except:
         expiry_range=datetime.date(year,month,25)
+    
+    user=session['fullname']
 
-    return render_template('order2.html',partial_pay_data=partial_pay_data,stocks=stocks,drug_details=drug_details, past_transaction_items=past_transaction_items,past_transactions=past_transactions,today=today,expiry_range=expiry_range)
+    return render_template('order2.html',user=user,partial_pay_data=partial_pay_data,stocks=stocks,drug_details=drug_details, past_transaction_items=past_transaction_items,past_transactions=past_transactions,today=today,expiry_range=expiry_range)
 
 @app.route('/products' ,methods=['POST','GET'] )
 def products():
