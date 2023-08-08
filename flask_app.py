@@ -75,6 +75,10 @@ def order():
         cursor=mydb.connection.cursor()
         cursor.execute('SELECT * from TRANSACTION WHERE PARTIAL_PAY="YES"')
         partial_pay_data=cursor.fetchall()
+
+        #Get bank Account information
+        cursor.execute('SELECT * from ACCOUNT')
+        Bank_Account=cursor.fetchall()
         
         if request.method=='POST':
             submit=str(request.form['submit'])
@@ -154,6 +158,15 @@ def order():
                     last_sales_id=int(last_sales_id)+1
                     cursor.execute('INSERT INTO SALES(SALES_ID,STOCK_ID,SALES_DATE,QUANTITY,UNIT_PRICE,TOTAL_AMOUNT)VALUES(%s,%s,%s,%s,%s,%s)',(last_sales_id,stockID[0],sale_date,stockID[1],cost,subtotal))
                     mydb.connection.commit()
+
+                    #Submit into the account
+                    cursor.execute('SELECT * from ACCOUNT')
+                    Bank_Account=cursor.fetchall()
+                    Bank_balance=int(Bank_Account[-1][5])+subtotal
+                    last_bank_id=int(Bank_Account[-1][0])+1
+                    cursor.execute('INSERT INTO ACCOUNT(BANK_TRANSACTION_ID,SALE_ID,AMOUNT_IN,BALANCE,DATE,EXPENSE_ID,AMOUNT_OUT,DEBIT)VALUES(%s,%s,%s,%s,%s,%s,%s,%s)',(last_bank_id,last_sales_id,subtotal,Bank_balance,sale_date,0,0," "))
+                    mydb.connection.commit()
+
                     #deduct from stocks_table[rem_stock]
                     cursor.execute('SELECT REM_STOCK FROM STOCK_TABLE WHERE STOCK_ID='+str(stockID[0]))
                     rem_stock=int(cursor.fetchall()[0][0])
@@ -177,6 +190,8 @@ def order():
                 id_number=str(session['id'])
                 cursor.execute('INSERT INTO TRANSACTION(TRANSACTION_ID,CASHIER_ID,SALE_DATE,TOTAL_SALES,PARTIAL_PAY)VALUES(%s,%s,%s,%s,%s)',(last_transaction_id,id_number,sale_date,total_cost,'NO'))
                 mydb.connection.commit()
+            
+            
             return redirect(url_for('order'))
 
             
@@ -217,12 +232,24 @@ def order():
 @app.route('/products' ,methods=['POST','GET'] )
 def products():
     if 'fullname' in session:
+
         #date
         today=datetime.date.today()
         #drug details
         cursor=mydb.connection.cursor()
         cursor.execute('SELECT * FROM DRUG_DETAILS')
         drug_details=cursor.fetchall()
+        #Finance information
+        cursor.execute('SELECT * FROM ACCOUNT ORDER BY BANK_TRANSACTION_ID DESC')
+        bank_data=cursor.fetchall()
+        if int(bank_data[0][5]) <1000:
+            msg='bank balance is low. Top up then Try again'
+        else:
+            msg=''
+
+        cursor.execute('SELECT * FROM EXPENDITURE ORDER BY EXPENDITURE_ID DESC')
+        expenditure=cursor.fetchall()
+
         #stock data for last stock information
         cursor.execute('SELECT * FROM STOCK_TABLE')
         stockdata=cursor.fetchall()
@@ -292,6 +319,17 @@ def products():
                     mydb.connection.commit()
                     #update SellingPrice
                     cursor.execute(f'UPDATE DRUG_DETAILS SET COST={drugSP} WHERE DRUG_ID={drugId}')
+                    mydb.connection.commit()
+
+                    # Remove money from the account
+                    subtotal=int(drugBP)*int(drugQuantity)
+                    bank_transaction_id=(bank_data[0][0])+1
+                    bank_balance=(bank_data[0][5])-subtotal
+                    expenditure_id=int(expenditure[0][0])+1
+                    cursor.execute('INSERT INTO EXPENDITURE(EXPENDITURE_ID,DATE,COMMODITY_TYPE,COMMODITY_NAME,DESCRIPTION,PROVIDER,QUANTITY,UNIT_PRICE,TRANSPORT_COST,TRANSACTION_COST,SUBTOTAL)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',(expenditure_id,today,'RESTOCK',' ','','',drugQuantity,drugBP,0,0,subtotal))
+                    mydb.connection.commit()
+
+                    cursor.execute('INSERT INTO ACCOUNT(BANK_TRANSACTION_ID,EXPENSE_ID,AMOUNT_OUT,BALANCE,DATE,SALE_ID,AMOUNT_IN,DEBIT)VALUES(%s,%s,%s,%s,%s,%s,%s,%s)',(bank_transaction_id,expenditure_id,subtotal,bank_balance,today,0,0," "))
                     mydb.connection.commit()
                     
 
@@ -418,7 +456,7 @@ def products():
     else:
         return redirect(url_for('signin'))
     
-    return render_template('products.html',today=today,expiry_range=expiry_range,managerCheck=managerCheck,drug_details=drug_details,suppliers=suppliers,users=users,stockdata=stockdata,stockdataDesc=stockdataDesc)
+    return render_template('products.html',msg=msg,today=today,expiry_range=expiry_range,managerCheck=managerCheck,drug_details=drug_details,suppliers=suppliers,users=users,stockdata=stockdata,stockdataDesc=stockdataDesc)
 
 
 @app.route('/accounts' ,methods=['POST','GET'] )
@@ -544,6 +582,59 @@ def store():
         expiry_range=datetime.date(year,month,25)
     
     return render_template('store.html',supplier_data=supplier_data,today=today,expiry_range=expiry_range,stockdataDesc=stockdataDesc,drug_details=drug_details)
+
+@app.route('/bank',methods=['POST','GET'])
+def bank():
+    cursor = mydb.connection.cursor()
+    cursor.execute('SELECT * FROM ACCOUNT ORDER BY BANK_TRANSACTION_ID DESC')
+    bank_data=cursor.fetchall()
+
+    cursor.execute('SELECT * FROM EXPENDITURE ORDER BY EXPENDITURE_ID DESC')
+    expenditure=cursor.fetchall()
+
+    available=bank_data[0][5]
+    
+    if request.method=='POST':
+        submit=request.form['submit']
+        if submit=='remove':
+            commodity_type=request.form['commodity_type']
+            commodity_name=request.form['commodity_name']
+            description=request.form['description']        
+            provider=request.form['provider']
+            quantity=request.form['quantity']
+            unit_price=request.form['unit_price']
+            transaction_cost=request.form['transaction_cost']
+            transport_cost=request.form['transport_cost']
+            subtotal=(int(quantity)*int(unit_price))+int(transaction_cost)+int(transport_cost)
+            expenditure_id=int(expenditure[0][0])+1
+            date=datetime.date.today()
+
+            if subtotal > available:
+                print('cant obtain more than available')
+                return redirect(url_for('bank'))
+
+
+            cursor.execute('INSERT INTO EXPENDITURE(EXPENDITURE_ID,DATE,COMMODITY_TYPE,COMMODITY_NAME,DESCRIPTION,PROVIDER,QUANTITY,UNIT_PRICE,TRANSPORT_COST,TRANSACTION_COST,SUBTOTAL)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',(expenditure_id,date,commodity_type,commodity_name,description,provider,quantity,unit_price,transport_cost,transaction_cost,subtotal))
+            mydb.connection.commit()
+
+            bank_transaction_id=(bank_data[0][0])+1
+            bank_balance=(bank_data[0][5])-subtotal
+
+            cursor.execute('INSERT INTO ACCOUNT(BANK_TRANSACTION_ID,EXPENSE_ID,AMOUNT_OUT,BALANCE,DATE,SALE_ID,AMOUNT_IN,DEBIT)VALUES(%s,%s,%s,%s,%s,%s,%s,%s)',(bank_transaction_id,expenditure_id,subtotal,bank_balance,date,0,0," "))
+            mydb.connection.commit()
+        
+        if submit=='deposit':
+            amount=int(request.form['amount_to_deposit'])
+            new_balance=float((bank_data[0][5]))+ float (amount)
+            today=datetime.date.today()
+            bank_transaction_id=(bank_data[0][0])+1
+            cursor.execute('INSERT INTO ACCOUNT(BANK_TRANSACTION_ID,EXPENSE_ID,AMOUNT_OUT,BALANCE,DATE,SALE_ID,AMOUNT_IN,DEBIT)VALUES(%s,%s,%s,%s,%s,%s,%s,%s)',(bank_transaction_id,0,0,new_balance,today,0,amount," "))
+            mydb.connection.commit()
+
+        return redirect(url_for('bank'))
+        
+
+    return render_template('Bank.html',bank_data=bank_data,available=available)
 
 
 if __name__ == '__main__':

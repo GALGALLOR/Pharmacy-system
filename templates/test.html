@@ -1,12 +1,31 @@
-<input type="number" min="0" max="5" step="1" value="0" id="limitedInput">
-
+<!DOCTYPE html>
+<html>
+<head>
+    
+</head>
+<body>
+    <h2>Perform an Operation</h2>
+    <input oninput="performOperation()" type="number" id="num1" placeholder="Enter number 1">
+    <input oninput="performOperation()" type="number" id="num2" placeholder="Enter number 2">
+    <p id="result"></p>
+</body>
 <script>
-const limitedInput = document.getElementById('limitedInput');
+    
+    function performOperation() {
+        // Get input values
+        const num1 = parseFloat(document.getElementById("num1").value);
+        const num2 = parseFloat(document.getElementById("num2").value);
 
-limitedInput.addEventListener('input', function() {
-    if (this.value > 5) {
-        this.value = 5;
-        alert('USE "BUY NOW"');
+        // Perform the operation (for example, addition)
+        const result = num1 + num2;
+
+        // Display the result below the inputs
+        const resultElement = document.getElementById("result");
+        resultElement.textContent = `Result: ${result}`;
     }
-});
+
+    // Automatically perform the calculation when input values change
+    document.getElementById("num1").addEventListener("input", performOperation);
+    document.getElementById("num2").addEventListener("input", performOperation);
 </script>
+</html>

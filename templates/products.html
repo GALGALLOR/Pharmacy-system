@@ -143,6 +143,7 @@
             <li><a style="background-color: #56c483;"  href="/products">MANAGEMENT</a></li>
             <li><a href="/store">STORE</a></li>
             <li><a href="/accounts">ACCOUNT</a></li>
+            <li><a href="/bank">FINANCE</a></li>
             <li><a href="/sign_in">LOGOUT</a></li>
         </ul>
     </div>
@@ -159,6 +160,7 @@
     <div  class="container"><label for="restock__">
         <h1>RE-STOCK :</h1></label>
         <form id="cont1" style="display:none;" method="post">
+            <p style="color:red" >{{msg}}</p>
             <input placeholder="ENTER DRUG NAME/BRAND" type="text" name="searchBar" id="searchBar1">
             <table class="itemTable" id="itemTable">
                 <tr>

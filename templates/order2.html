@@ -243,6 +243,7 @@
             <li><a href="/products">MANAGEMENT</a></li>
             <li><a href="/store">STORE</a></li>
             <li><a href="/accounts">ACCOUNT</a></li>
+            <li><a href="/bank">FINANCE</a></li>
             <li><a href="/sign_in">LOGOUT</a></li>
         </ul>
     </div>
@@ -256,7 +257,7 @@
         <input autocomplete="off" type="text" placeholder="Search for drug" name="searchBar" id="searchBar">
         <table id="itemTable">
             <tr>
-                <th>DrugID</th>
+                <th>StockID</th>
                 <th>Brand</th>
                 <th>Drug Components</th>
                 <th>Category</th>
@@ -284,7 +285,7 @@
     {%else%}
     <tr>
     {%endif%}
-                <td>{{stock[1]}}</td>
+                <td>{{stock[0]}}</td>
                 <td>{{drug[1]}}</td>
                 <td>{{drug[3]}}</td>
                 <td>{{drug[2]}}</td>
