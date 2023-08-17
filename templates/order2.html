@@ -247,7 +247,7 @@
             <li><a href="/sign_in">LOGOUT</a></li>
         </ul>
     </div>
-    <h1>Welcome {{user}}</h1>
+    <h1>Welcome to Affatu Medical Clinic</h1>
     <div class="casual">
         <input onclick="funcOrder()" style="display:none;" type="checkbox" name="startOrder" id="startOrder">
         <label for="startOrder" id="OrderButton">Start Order</label>
@@ -349,7 +349,11 @@
                     <td>{{partial_pay[3]}}</td>
                     <td><ul>{%for past_transaction_item in past_transaction_items%}
                         {%if past_transaction_item[1] == partial_pay[0]%}
-                        <li>{{past_transaction_item[4]}} : Ksh {{past_transaction_item[3]}}x{{past_transaction_item[2]}}={{past_transaction_item[5]}}</li>
+                        {%for drug in drug_details%}
+                        {%if drug[0]==past_transaction_item[4]%}
+                        <li>{{drug[3]}} : Ksh {{past_transaction_item[3]}}x{{past_transaction_item[2]}}={{past_transaction_item[5]}}</li>
+                        {%endif%}
+                        {%endfor%}
                         {%endif%}
                         {%endfor%}</ul>
                     </td>
@@ -372,7 +376,11 @@
                 <td>{{transaction[3]}}</td>
                 <td><ul>{%for past_transaction_item in past_transaction_items%}
                     {%if past_transaction_item[1] == transaction[0]%}
-                    <li>{{past_transaction_item[4]}} : Ksh {{past_transaction_item[3]}}x{{past_transaction_item[2]}}={{past_transaction_item[5]}}</li>
+                    {%for drug in drug_details%}
+                    {%if drug[0]==past_transaction_item[4]%}
+                    <li>{{drug[3]}} : Ksh {{past_transaction_item[3]}}x{{past_transaction_item[2]}}={{past_transaction_item[5]}}</li>
+                    {%endif%}
+                    {%endfor%}
                     {%endif%}
                     {%endfor%}</ul>
                 </td>
@@ -389,7 +397,7 @@
         const limitedInput = document.getElementById('Amount_Paid');
 
 limitedInput.addEventListener('input', function() {
-    if (this.value > TotalCost.value) {
+    if (Number(this.value) > Number(TotalCost.value)) {
         this.value = TotalCost.value;
         alert('USE "BUY NOW"');
     }
